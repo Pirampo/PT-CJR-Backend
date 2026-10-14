@@ -16,7 +16,7 @@ model Usuarios {
   id                Int                      @id @default(autoincrement())
   username          String                   @unique @db.VarChar(255) // nao diz que é unique, mas deixei assim mesmp
   nome              String                   @db.VarChar(255)
-  email             String                   @db.VarChar(255)
+  email             String                   @unique @db.VarChar(255)
   senha_hash        String                   @db.VarChar(255)
   foto_perfil_url   String?                  @db.VarChar(255)
   createdAt         DateTime?                @default(now())

@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Usuarios {
+  id                Int                      @id @default(autoincrement())
+  username          String                   @unique @db.VarChar(255) // nao diz que é unique, mas deixei assim mesmp
+  nome              String                   @db.VarChar(255)
+  email             String                   @db.VarChar(255)
+  senha_hash        String                   @db.VarChar(255)
+  foto_perfil_url   String?                  @db.VarChar(255)
+  createdAt         DateTime?                @default(now())
+  updatedAt         DateTime?                @updatedAt
+  lojas             Lojas[]
+  usuario           Avaliacoes_Loja[]
+  usuarios          Comentarios_Avaliacoes[]
+  avaliacao_produto Avaliacoes_Produtos[]
+}
+
+model Lojas {
+  id              Int               @id @default(autoincrement())
+  usuario_id      Int
+  nome            String            @unique @db.VarChar(255)
+  descricao       String?
+  logo_url        String?           @db.VarChar(255)
+  banner_url      String?           @db.VarChar(255)
+  sticker_url     String?           @db.VarChar(255)
+  createdAt       DateTime?         @default(now())
+  updatedAt       DateTime?         @updatedAt
+  usuario         Usuarios          @relation(fields: [usuario_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  produtos        Produtos[]
+  avaliacoes_loja Avaliacoes_Loja[]
+}
+
+model Categorias {
+  id               Int        @id @default(autoincrement())
+  nome             String     @db.VarChar(100)
+  categoria_pai_id Int?
+  produtos         Produtos[]
+
+  // subcategorias para a categoria pai
+  categoria_pai Categorias?  @relation("SubCategorias", fields: [categoria_pai_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  subCategorias Categorias[] @relation("SubCategorias")
+}
+
+model Produtos {
+  id           Int                   @id @default(autoincrement())
+  loja_id      Int
+  categoria_id Int
+  nome         String                @db.VarChar(255)
+  descricao    String?               @db.Text
+  preco        Decimal               @db.Decimal(10, 2)
+  estoque      Int                   @default(0)
+  createdAt    DateTime?             @default(now())
+  updatedAt    DateTime?             @updatedAt
+  categoria    Categorias            @relation(fields: [categoria_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  lojas        Lojas                 @relation(fields: [loja_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  imagem       Imagens_Produtos[]
+  produto      Avaliacoes_Produtos[]
+}
+
+model Avaliacoes_Loja {
+  id          Int                      @id @default(autoincrement())
+  usuario_id  Int
+  loja_id     Int
+  nota        Int
+  comentario  String?                  @db.Text
+  createdAt   DateTime?                @default(now())
+  updatedAt   DateTime?                @updatedAt()
+  usuario     Usuarios                 @relation(fields: [usuario_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  lojas       Lojas                    @relation(fields: [loja_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  avalia_Loja Comentarios_Avaliacoes[]
+}
+
+model Comentarios_Avaliacoes {
+  id                   Int                  @id @default(autoincrement())
+  usuario_id           Int
+  avaliacao_loja_id    Int?
+  avaliacao_produto_id Int?
+  conteudo             String               @db.Text
+  createdAt            DateTime?            @default(now())
+  updatedAt            DateTime?            @updatedAt
+  usuarios             Usuarios             @relation(fields: [usuario_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  avalia_Loja          Avaliacoes_Loja?     @relation(fields: [avaliacao_loja_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  avalia_produto       Avaliacoes_Produtos? @relation(fields: [avaliacao_produto_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+}
+
+model Avaliacoes_Produtos {
+  id                Int                      @id @default(autoincrement())
+  usuario_id        Int
+  produto_id        Int
+  nota              Int
+  comentario        String?                  @db.Text
+  createdAt         DateTime?                @default(now())
+  updatedAt         DateTime?                @updatedAt
+  avalia_produto    Comentarios_Avaliacoes[]
+  avaliacao_produto Usuarios                 @relation(fields: [usuario_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  produto           Produtos                 @relation(fields: [produto_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+}
+
+model Imagens_Produtos {
+  id         Int      @id @default(autoincrement())
+  produto_id Int
+  url_imagem String   @db.VarChar(255)
+  ordem      Int      @default(0)
+  imagem     Produtos @relation(fields: [produto_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+}

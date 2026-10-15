@@ -2,12 +2,12 @@
 // tipo dados esperados pela requisição
 
 export class Usuarios {
-  id: Number;
-  username: String;
-  nome: String;
-  email: String;
-  senha_hash: String;
-  foto_perfil_url: String;
+  id: number;
+  username: string;
+  nome: string;
+  email: string;
+  senha_hash: string;
+  foto_perfil_url: string;
   createdAt: Date | null;
   updatedAt: Date | null;
 }

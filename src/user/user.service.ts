@@ -24,7 +24,13 @@ export class UserService {
       where: { username: createUserDto.username },
     });
     if (mesmoUsername) {
-      throw new ConflictException('Este username já está sendo usado.');
+      throw new ConflictException('Este username já está sendo utilizado.');
+    }
+    const mesmoEmail = await this.prisma.usuarios.findUnique({
+      where: { email: createUserDto.email },
+    });
+    if (mesmoEmail) {
+      throw new ConflictException('Este Email já está sendo utilizado.');
     }
 
     const { senha, ...userData } = createUserDto;

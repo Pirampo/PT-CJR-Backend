@@ -12,6 +12,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { PostModule } from './post/post.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { AuthGuard } from './auth/auth.guard.js';
+import { CategoriasModule } from './categorias/categorias.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -43,6 +44,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         return config;
       },
     }),
+
+    CategoriasModule,
   ],
 
   controllers: [AppController],

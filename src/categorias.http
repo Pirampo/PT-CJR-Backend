@@ -1,0 +1,57 @@
+### 1. Criar usuário de teste
+POST http://localhost:3000/user
+Content-Type: application/json
+
+{
+  "email": "teste@email.com",
+  "senha": "123456",
+  "nome": "Usuario Teste",
+  "username": "usuario_teste"
+}
+
+###
+
+### 2. Fazer login
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "email": "teste@email.com",
+  "senha": "123456"
+}
+
+###
+
+### 3. Criar categoria
+POST http://localhost:3000/categorias
+Content-Type: application/json
+Authorization: Bearer SEU_TOKEN_AQUI
+
+{
+  "nome": "Eletrônicos"
+}
+
+###
+
+### 4. Listar categorias
+GET http://localhost:3000/categorias
+Authorization: Bearer SEU_TOKEN_AQUI
+
+###
+
+### 5. Atualizar categoria
+PATCH http://localhost:3000/categorias/1
+Content-Type: application/json
+Authorization: Bearer SEU_TOKEN_AQUI
+
+{
+  "nome": "Tecnologia"
+}
+
+###
+
+### 6. Excluir categoria
+DELETE http://localhost:3000/categorias/1
+Authorization: Bearer SEU_TOKEN_AQUI
+
+###

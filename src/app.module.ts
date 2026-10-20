@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { AuthGuard } from './auth/auth.guard.js';
 import { CategoriasModule } from './categorias/categorias.module.js';
 import { LojasModule } from './lojas/lojas.module.js';
+import { ProdutosModule } from './produtos/produtos.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -49,6 +50,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     CategoriasModule,
 
     LojasModule,
+
+    ProdutosModule,
   ],
 
   controllers: [AppController],

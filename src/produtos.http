@@ -1,0 +1,112 @@
+### Variáveis de teste
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkyNTA1MzMyLCJleHAiOjE3OTI1OTE3MzJ9.HvQjG7fDvyXX9n8b9nh4kJc4399ioaB97VIazjOAo08
+@lojaId = 2
+@categoriaId = 2
+@produtoId = 2
+
+
+### 1. Login
+
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "email": "teste@email.com",
+  "senha": "123456"
+}
+
+###
+
+
+### 2. Conferir lojas
+
+GET http://localhost:3000/lojas
+Authorization: Bearer {{token}}
+
+###
+
+
+### 3. Conferir categorias
+
+GET http://localhost:3000/categorias
+Authorization: Bearer {{token}}
+
+###
+
+
+### 4. Criar categoria para teste
+
+POST http://localhost:3000/categorias
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "Eletrônicos"
+}
+
+###
+
+
+### 5. Criar produto
+
+POST http://localhost:3000/produtos
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "loja_id": {{lojaId}},
+  "categoria_id": {{categoriaId}},
+  "nome": "Produto Teste",
+  "descricao": "Produto criado para testar o CRUD",
+  "preco": 199.90,
+  "estoque": 10
+}
+
+###
+
+
+### 6. Listar produtos
+
+GET http://localhost:3000/produtos
+Authorization: Bearer {{token}}
+
+###
+
+
+### 7. Buscar produto por ID
+
+GET http://localhost:3000/produtos/{{produtoId}}
+Authorization: Bearer {{token}}
+
+###
+
+
+### 8. Atualizar produto
+
+PATCH http://localhost:3000/produtos/{{produtoId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "Produto Atualizado",
+  "preco": 249.90,
+  "estoque": 20
+}
+
+###
+
+
+### 9. Excluir produto
+
+DELETE http://localhost:3000/produtos/{{produtoId}}
+Authorization: Bearer {{token}}
+
+###
+
+
+### 10. Conferir exclusão
+
+GET http://localhost:3000/produtos
+Authorization: Bearer {{token}}
+
+###

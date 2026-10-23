@@ -1,0 +1,66 @@
+### 1. Login
+
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "email": "teste@email.com",
+  "senha": "123456"
+}
+
+###
+
+### 2. Criar loja
+
+POST http://localhost:3000/lojas
+Content-Type: application/json
+Authorization: Bearer SEU_TOKEN_AQUI
+
+{
+  "usuario_id": 1,
+  "nome": "Loja Teste",
+  "descricao": "Loja criada para teste do CRUD"
+}
+
+###
+
+### 3. Listar lojas
+
+GET http://localhost:3000/lojas
+Authorization: Bearer SEU_TOKEN_AQUI
+
+###
+
+### 4. Buscar loja por ID
+
+GET http://localhost:3000/lojas/1
+Authorization: Bearer SEU_TOKEN_AQUI
+
+###
+
+### 5. Atualizar loja
+
+PATCH http://localhost:3000/lojas/1
+Content-Type: application/json
+Authorization: Bearer SEU_TOKEN_AQUI
+
+{
+  "nome": "Loja Atualizada",
+  "descricao": "Descrição atualizada"
+}
+
+###
+
+### 6. Excluir loja
+
+DELETE http://localhost:3000/lojas/1
+Authorization: Bearer SEU_TOKEN_AQUI
+
+###
+
+### 7. Conferir exclusão
+
+GET http://localhost:3000/lojas
+Authorization: Bearer SEU_TOKEN_AQUI
+
+###

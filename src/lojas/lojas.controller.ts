@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { LojasService } from './lojas.service.js';
 import { CreateLojaDto } from './dto/create-loja.dto.js';
@@ -28,21 +29,24 @@ export class LojasController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.lojasService.findOne(Number(id));
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.lojasService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateLojaDto: UpdateLojaDto,
     @CurrentUser() user: UserPayload,
   ) {
-    return this.lojasService.update(Number(id), user.sub, updateLojaDto);
+    return this.lojasService.update(id, user.sub, updateLojaDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.lojasService.remove(Number(id));
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: UserPayload,
+  ) {
+    return this.lojasService.remove(id, user.sub);
   }
 }

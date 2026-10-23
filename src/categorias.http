@@ -3,10 +3,10 @@ POST http://localhost:3000/user
 Content-Type: application/json
 
 {
-  "email": "teste@email.com",
+  "email": "rafael@email.com",
   "senha": "123456",
-  "nome": "Usuario Teste",
-  "username": "usuario_teste"
+  "nome": "Rafael",
+  "username": "Rafael"
 }
 
 ###
@@ -16,7 +16,7 @@ POST http://localhost:3000/login
 Content-Type: application/json
 
 {
-  "email": "teste@email.com",
+  "email": "rafael@email.com",
   "senha": "123456"
 }
 
@@ -25,33 +25,32 @@ Content-Type: application/json
 ### 3. Criar categoria
 POST http://localhost:3000/categorias
 Content-Type: application/json
-Authorization: Bearer SEU_TOKEN_AQUI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYnJicmlsbEBlbWFpbC5jb20iLCJpYXQiOjE3OTI3ODQ2MzEsImV4cCI6MTc5Mjg3MTAzMX0.LNlgIf44Z-mwoiLNLfp90fuSaCCCz-pMp889C7YBM0I
 
 {
-  "nome": "Eletrônicos"
+  "nome": "Produtos de Limpeza"
 }
 
 ###
 
 ### 4. Listar categorias
 GET http://localhost:3000/categorias
-Authorization: Bearer SEU_TOKEN_AQUI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYnJicmlsbEBlbWFpbC5jb20iLCJpYXQiOjE3OTI3ODQ2MzEsImV4cCI6MTc5Mjg3MTAzMX0.LNlgIf44Z-mwoiLNLfp90fuSaCCCz-pMp889C7YBM0I
 
 ###
 
 ### 5. Atualizar categoria
-PATCH http://localhost:3000/categorias/1
+PATCH http://localhost:3000/categorias/5
 Content-Type: application/json
-Authorization: Bearer SEU_TOKEN_AQUI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYnJicmlsbEBlbWFpbC5jb20iLCJpYXQiOjE3OTI3ODQ2MzEsImV4cCI6MTc5Mjg3MTAzMX0.LNlgIf44Z-mwoiLNLfp90fuSaCCCz-pMp889C7YBM0I
 
 {
-  "nome": "Tecnologia"
+  "nome": "Limpeza"
 }
 
 ###
 
-### 6. Excluir categoria
 DELETE http://localhost:3000/categorias/1
-Authorization: Bearer SEU_TOKEN_AQUI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYnJicmlsbEBlbWFpbC5jb20iLCJpYXQiOjE3OTI3ODQ2MzEsImV4cCI6MTc5Mjg3MTAzMX0.LNlgIf44Z-mwoiLNLfp90fuSaCCCz-pMp889C7YBM0I
 
 ###

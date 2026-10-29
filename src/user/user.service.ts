@@ -78,7 +78,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`Usuario com ID ${id} não encontrado!`);
     }
 
     return user;
@@ -100,7 +100,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`Usuario com ID ${id} não encontrado!`);
     }
     if (updateUserDto.email && updateUserDto.email !== user.email) {
       const existingEmail = await this.prisma.usuarios.findUnique({

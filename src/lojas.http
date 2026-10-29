@@ -1,0 +1,66 @@
+### 1. Login
+
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "email": "rafael@email.com",
+  "senha": "123456"
+}
+
+###
+
+### 2. Criar loja
+
+POST http://localhost:3000/lojas
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkyNTEwNDI3LCJleHAiOjE3OTI1OTY4Mjd9.FzLsu2V2mPzwiZbliXVRBxjVDvuUJmceuC1fbH4jMQU
+
+{
+  "usuario_id": 3,
+  "nome": "Cruxas store",
+  "descricao": "loja de coisas do brabo"
+}
+
+###
+
+### 3. Listar lojas
+
+GET http://localhost:3000/lojas
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkyNTEwNDI3LCJleHAiOjE3OTI1OTY4Mjd9.FzLsu2V2mPzwiZbliXVRBxjVDvuUJmceuC1fbH4jMQU
+
+###
+
+### 4. Buscar loja por ID
+
+GET http://localhost:3000/lojas/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkyNTEwNDI3LCJleHAiOjE3OTI1OTY4Mjd9.FzLsu2V2mPzwiZbliXVRBxjVDvuUJmceuC1fbH4jMQU
+
+###
+
+### 5. Atualizar loja
+
+PATCH http://localhost:3000/lojas/3
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkyNTEwNDI3LCJleHAiOjE3OTI1OTY4Mjd9.FzLsu2V2mPzwiZbliXVRBxjVDvuUJmceuC1fbH4jMQU
+
+{
+  "nome": "Store Crucru",
+  "descricao": "Descrição atualizada Br bill"
+}
+
+###
+
+### 6. Excluir loja
+
+DELETE http://localhost:3000/lojas/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkyNTEwNDI3LCJleHAiOjE3OTI1OTY4Mjd9.FzLsu2V2mPzwiZbliXVRBxjVDvuUJmceuC1fbH4jMQU
+
+###
+
+### 7. Conferir exclusão
+
+GET http://localhost:3000/lojas
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkyNTEwNDI3LCJleHAiOjE3OTI1OTY4Mjd9.FzLsu2V2mPzwiZbliXVRBxjVDvuUJmceuC1fbH4jMQU
+
+###

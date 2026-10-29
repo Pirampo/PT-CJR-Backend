@@ -1,10 +1,3 @@
-### Variáveis de teste
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkyNTA1MzMyLCJleHAiOjE3OTI1OTE3MzJ9.HvQjG7fDvyXX9n8b9nh4kJc4399ioaB97VIazjOAo08
-@lojaId = 2
-@categoriaId = 2
-@produtoId = 2
-
-
 ### 1. Login
 
 POST http://localhost:3000/login
@@ -17,28 +10,25 @@ Content-Type: application/json
 
 ###
 
-
 ### 2. Conferir lojas
 
 GET http://localhost:3000/lojas
-Authorization: Bearer {{token}}
+Authorization: Bearer SEU_TOKEN_AQUI
 
 ###
-
 
 ### 3. Conferir categorias
 
 GET http://localhost:3000/categorias
-Authorization: Bearer {{token}}
+Authorization: Bearer SEU_TOKEN_AQUI
 
 ###
-
 
 ### 4. Criar categoria para teste
 
 POST http://localhost:3000/categorias
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer SEU_TOKEN_AQUI
 
 {
   "nome": "Eletrônicos"
@@ -46,16 +36,15 @@ Authorization: Bearer {{token}}
 
 ###
 
-
 ### 5. Criar produto
 
 POST http://localhost:3000/produtos
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer SEU_TOKEN_AQUI
 
 {
-  "loja_id": {{lojaId}},
-  "categoria_id": {{categoriaId}},
+  "loja_id": 2,
+  "categoria_id": 2,
   "nome": "Produto Teste",
   "descricao": "Produto criado para testar o CRUD",
   "preco": 199.90,
@@ -64,28 +53,25 @@ Authorization: Bearer {{token}}
 
 ###
 
-
 ### 6. Listar produtos
 
 GET http://localhost:3000/produtos
-Authorization: Bearer {{token}}
+Authorization: Bearer SEU_TOKEN_AQUI
 
 ###
-
 
 ### 7. Buscar produto por ID
 
-GET http://localhost:3000/produtos/{{produtoId}}
-Authorization: Bearer {{token}}
+GET http://localhost:3000/produtos/2
+Authorization: Bearer SEU_TOKEN_AQUI
 
 ###
 
-
 ### 8. Atualizar produto
 
-PATCH http://localhost:3000/produtos/{{produtoId}}
+PATCH http://localhost:3000/produtos/2
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer SEU_TOKEN_AQUI
 
 {
   "nome": "Produto Atualizado",
@@ -95,18 +81,16 @@ Authorization: Bearer {{token}}
 
 ###
 
-
 ### 9. Excluir produto
 
-DELETE http://localhost:3000/produtos/{{produtoId}}
-Authorization: Bearer {{token}}
+DELETE http://localhost:3000/produtos/2
+Authorization: Bearer SEU_TOKEN_AQUI
 
 ###
-
 
 ### 10. Conferir exclusão
 
 GET http://localhost:3000/produtos
-Authorization: Bearer {{token}}
+Authorization: Bearer SEU_TOKEN_AQUI
 
 ###

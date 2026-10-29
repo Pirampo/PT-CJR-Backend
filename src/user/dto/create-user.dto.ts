@@ -9,6 +9,10 @@ import {
 // faz a leitura e avaliação dos dados recebidos da requisição a partir do ValidationPipe
 // será aceita a requisição apenas se todos os campos obrigatórios forem devidamente preenchidos
 
+
+
+
+
 export class CreateUserDto {
   @IsEmail({}, { message: 'O email fornecido é inválido.' })
   @IsNotEmpty({ message: 'O campo email não pode estar vazio.' })

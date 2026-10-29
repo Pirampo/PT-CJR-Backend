@@ -1,0 +1,9 @@
+POST http://localhost:3001/user
+Content-Type: application/json
+
+{
+  "nome": "Teste do pirampo",
+  "username": "teste",
+  "email": "teste@email.com",
+  "senha": "123456"
+}

@@ -29,7 +29,9 @@ export class ProdutosService {
   }
 
   findAll() {
-    return this.prisma.produtos.findMany();
+    return this.prisma.produtos.findMany({
+      include: { imagem: { orderBy: { ordem: 'asc' } } },
+    });
   }
 
   async findOne(id: number) {

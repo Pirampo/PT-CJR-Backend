@@ -11,6 +11,7 @@ import {
 import { CategoriasService } from './categorias.service.js';
 import { CreateCategoriaDto } from './dto/create-categoria.dto.js';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto.js';
+import { Public } from '../auth/decorators/isPublic.decorator.js';
 
 @Controller('categorias')
 export class CategoriasController {
@@ -21,11 +22,13 @@ export class CategoriasController {
     return this.categoriasService.create(createCategoriaDto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.categoriasService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.categoriasService.findOne(id);

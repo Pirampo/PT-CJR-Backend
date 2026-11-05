@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:3001
 
 # Cole aqui o access_token que o login (passo 1) devolver
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkzNzMwMjQ3LCJleHAiOjE3OTM4MTY2NDd9.bThiB2VHWOA31PSMWDKV_Ykn8E6cahmH-sA70dT-Stg
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkzOTEzMzk3LCJleHAiOjE3OTM5OTk3OTd9.cK6iJJkpWKtmp26r72CvnuqyCRzEPCL0rU1gYGWfur4
 
 # Token de um SEGUNDO usuário, para o teste do passo 10
 @token2 = TOKEN_DO_OUTRO_USUARIO
@@ -48,7 +48,7 @@ Authorization: Bearer {{token}}
   "comentario": "Loja ótima, entrega rápida!"
 }
 
-### 4. Listar avaliações (sem token, pois a rota é pública)
+### 4. Listar avaliações
 
 GET {{baseUrl}}/avaliacoes-loja
 

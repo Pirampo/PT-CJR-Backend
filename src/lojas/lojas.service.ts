@@ -15,26 +15,32 @@ export class LojasService {
       data: createLojaDto,
     });
   }
+  async findByUser(userId: number) {
+    const lojas_associadas = await this.prisma.lojas.findMany({
+      where: { usuario_id: userId },
+    });
+    if (lojas_associadas.length === 0) {
+      return 'Nenhuma loja cadastrada por você.';
+    }
+
+    return lojas_associadas;
+  }
 
   findAll() {
     return this.prisma.lojas.findMany();
   }
 
+  async findOne(id: number) {
+    const loja = await this.prisma.lojas.findUnique({
+      where: { id },
+    });
 
-    async findOne(id: number) {
-      const loja = await this.prisma.lojas.findUnique({
-        where: { id },
-      });
-
-      if (!loja) {
-        throw new NotFoundException(
-          `Loja com ID ${id} não encontrada!`,
-        );
-      }
-
-      return loja;
+    if (!loja) {
+      throw new NotFoundException(`Loja com ID ${id} não encontrada!`);
     }
 
+    return loja;
+  }
 
   async update(id: number, usuarioId: number, updateLojaDto: UpdateLojaDto) {
     // verifica se o usuario cadastrou a loja
@@ -74,7 +80,6 @@ export class LojasService {
   }
 
   async remove(id: number, usuarioId: number) {
-
     const loja = await this.prisma.lojas.findFirst({
       where: {
         id,
@@ -99,5 +104,4 @@ export class LojasService {
       },
     });
   }
-
 }

@@ -1,0 +1,129 @@
+@baseUrl = http://localhost:3001
+
+# Cole aqui o access_token que o login (passo 1) devolver
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkzOTExOTc4LCJleHAiOjE3OTM5OTgzNzh9.LNsenORaOohGACMX2MBrUAuUW_-iTx5XeOAk_EBT838
+
+# Token de um SEGUNDO usuário, para o teste do passo 10
+@token2 = TOKEN_DO_OUTRO_USUARIO
+
+###
+
+GET http://localhost:3001/user/me
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "Teste"
+}
+###
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "loja_id": 2,
+  "categoria_id": null,
+  "nome": "Produto Teste",
+  "preco": 99.90,
+  "estoque": 5
+}
+### 1. Login
+
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "teste@email.com",
+  "senha": "123456"
+}
+
+### 2. Conferir produtos (para saber um produto_id que existe)
+
+GET {{baseUrl}}/produtos
+Authorization: Bearer {{token}}
+
+### 3. Criar avaliação
+
+POST {{baseUrl}}/avaliacoes-produtos
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "produto_id": 1,
+  "nota": 5,
+  "comentario": "Produto bom uhuul"
+}
+
+### 4. Listar avaliações
+
+GET {{baseUrl}}/avaliacoes-produtos
+
+### 5. Buscar avaliação por ID (sem token)
+
+GET {{baseUrl}}/avaliacoes-produtos/1
+
+### 6. Atualizar avaliação
+
+PATCH {{baseUrl}}/avaliacoes-produtos/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nota": 4,
+  "comentario": "Mudei de ideia, demorou um pouco."
+}
+
+### 7. ERRO esperado 400: nota fora de 1 a 5
+
+POST {{baseUrl}}/avaliacoes-produtos
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "produto_id": 1,
+  "nota": 6
+}
+
+### 8. ERRO esperado 404: produto com ID 9999 nao encontrado
+
+POST {{baseUrl}}/avaliacoes-produtos
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "produto_id": 99999,
+  "nota": 3
+}
+
+### 9. ERRO esperado 401: criar sem token
+
+POST {{baseUrl}}/avaliacoes-produtos
+Content-Type: application/json
+
+{
+  "produto_id": 1,
+  "nota": 3
+}
+
+### 10. ERRO esperado 403: outro usuário tentando alterar a avaliação
+
+PATCH {{baseUrl}}/avaliacoes-produtos/1
+Content-Type: application/json
+Authorization: Bearer {{token2}}
+
+{
+  "nota": 1
+}
+
+### 11. Excluir avaliação
+
+DELETE {{baseUrl}}/avaliacoes-produtos/1
+Authorization: Bearer {{token}}
+
+### 12. Conferir exclusão: esperado 404
+
+GET {{baseUrl}}/avaliacoes-produtos/1

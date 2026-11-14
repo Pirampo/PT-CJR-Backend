@@ -45,6 +45,21 @@ export class ProdutosController {
   }
 
   @Public()
+  @Get(':id/imagens')
+  listarImagens(@Param('id', ParseIntPipe) id: number) {
+    return this.produtosService.listarImagens(id);
+  }
+
+  @Public()
+  @Get(':id/imagens/:imagemId')
+  buscarImagem(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('imagemId', ParseIntPipe) imagemId: number,
+  ) {
+    return this.produtosService.buscarImagem(id, imagemId);
+  }
+
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.produtosService.findOne(id);
@@ -102,4 +117,59 @@ export class ProdutosController {
 
     return this.produtosService.uploadImagem(id, user.sub, file);
   }
+
+  @Patch(':id/imagens/:imagemId')
+  @UseInterceptors(
+    FileInterceptor('imagem', {
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+      fileFilter: (req, file, callback) => {
+        const permitidos = ['image/jpeg', 'image/png', 'image/webp'];
+
+        if (!permitidos.includes(file.mimetype)) {
+          return callback(
+            new BadRequestException('Formato de imagem não permitido.'),
+            false,
+          );
+        }
+
+        callback(null, true);
+      },
+    }),
+  )
+  substituirImagem(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('imagemId', ParseIntPipe) imagemId: number,
+    @UploadedFile() file: {
+      buffer: Buffer;
+      mimetype: string;
+    },
+    @CurrentUser() user: UserPayload,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Envie uma imagem.');
+    }
+
+    return this.produtosService.substituirImagem(
+      id,
+      imagemId,
+      user.sub,
+      file,
+    );
+  }
+
+  @Delete(':id/imagens/:imagemId')
+  removerImagem(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('imagemId', ParseIntPipe) imagemId: number,
+    @CurrentUser() user: UserPayload,
+  ) {
+    return this.produtosService.removerImagem(
+      id,
+      imagemId,
+      user.sub,
+    );
+  }
+
 }

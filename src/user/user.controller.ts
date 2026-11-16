@@ -33,6 +33,14 @@ export class UserController {
     return this.userService.findOne(currentUserId);
   }
 
+  // Perfil público (sem e-mail), usado na página do proprietário da loja.
+  // Declarada depois de 'me' para não capturar essa rota.
+  @Public()
+  @Get(':id')
+  findPublicProfile(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findPublicProfile(id);
+  }
+
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,

@@ -72,6 +72,8 @@ export class UserService {
         id: true,
         email: true,
         nome: true,
+        username: true,
+        foto_perfil_url: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -82,6 +84,41 @@ export class UserService {
     }
 
     return user;
+  }
+
+  // Dados públicos do usuário: não inclui e-mail nem senha.
+  async findPublicProfile(id: number) {
+    const user = await this.prisma.usuarios.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        nome: true,
+        username: true,
+        foto_perfil_url: true,
+        lojas: {
+          orderBy: { id: 'asc' },
+          select: {
+            id: true,
+            nome: true,
+            foto_perfil_url: true,
+            logo_url: true,
+            banner_url: true,
+            categoria: { select: { id: true, nome: true } },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuario com ID ${id} não encontrado!`);
+    }
+
+    return {
+      ...user,
+      // Apenas identificadores simples são públicos. Dados legados com
+      // formato de e-mail permanecem privados, sem alterar o banco.
+      username: /^[A-Za-z0-9_.-]+$/.test(user.username) ? user.username : null,
+    };
   }
 
   async findByEmail(email: string) {

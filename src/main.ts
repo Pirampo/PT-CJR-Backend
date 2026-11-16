@@ -3,6 +3,8 @@ import { AppModule } from './app.module.js';
 import { ValidationPipe } from '@nestjs/common'; // sequencia de etapas que a requisicao passa dentro do Nest (create-user.dto.ts)
 import 'dotenv/config';
 import { ObserveInstrument } from './app.module.js';
+import { static as serveStatic } from 'express';
+import { join } from 'node:path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -17,6 +19,13 @@ async function bootstrap() {
     }),
   );
   app.enableCors({ origin: 'http://localhost:3000' });
+  app.use(
+    '/uploads',
+    serveStatic(join(process.cwd(), 'uploads'), {
+      dotfiles: 'deny',
+      index: false,
+    }),
+  );
   await app.listen(3001);
 }
 

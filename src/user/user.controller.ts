@@ -19,15 +19,12 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Public() // como o auth.guard protege todas as rotas esperando um token valido, a rota de criacao de usuario deve ser publica
+  @Public()
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
-  // impede que seja passado os id's dos usuarios cadastradados usando GET /user ou GET /user/2
-  // assim retorna apenas os dados do próprio usuário, com excção da senha
-  // as proximas rotas nao recebem o decorator Public, pois precisam da autorizacao do auth.guard
   @Get('me')
   findMe(@CurrentUser('sub') currentUserId: number) {
     return this.userService.findOne(currentUserId);

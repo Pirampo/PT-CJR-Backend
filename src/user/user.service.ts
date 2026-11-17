@@ -7,10 +7,32 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
+import { converterImagem, gravarImagem, removerArquivo, removerFotoAnterior } from '../imagens/arquivo-imagem.js';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async atualizarFoto(id: number, arquivo: Express.Multer.File | undefined) {
+    const usuario = await this.prisma.usuarios.findUnique({
+      where: { id }, select: { id: true, foto_perfil_url: true },
+    });
+    if (!usuario) throw new NotFoundException('Usuário não encontrado.');
+    const conteudo = await converterImagem(arquivo, true);
+    const imagem = await gravarImagem('usuarios', id, conteudo);
+    let atualizado;
+    try {
+      atualizado = await this.prisma.usuarios.update({
+        where: { id }, data: { foto_perfil_url: imagem.url },
+        select: { id: true, foto_perfil_url: true },
+      });
+    } catch (erro) {
+      await removerArquivo(imagem.caminho);
+      throw erro;
+    }
+    await removerFotoAnterior(id, usuario.foto_perfil_url);
+    return atualizado;
+  }
 
   async create(createUserDto: CreateUserDto) {
     const existingUser = await this.prisma.usuarios.findUnique({

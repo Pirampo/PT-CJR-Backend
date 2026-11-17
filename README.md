@@ -27,6 +27,8 @@
 
 ## Project setup
 
+A demonstração opcional Sabor da Vila pode ser reproduzida com `npm run seed:demo` em uma base local dedicada. Consulte [configuração, segurança e testes do seed](docs/seed-demo.md). O comando não é executado ao iniciar a aplicação.
+
 ```bash
 $ npm install
 ```

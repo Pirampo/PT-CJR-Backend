@@ -8,7 +8,12 @@ import {
   Delete,
   ForbiddenException,
   ParseIntPipe,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import { LIMITE_FOTO } from '../imagens/arquivo-imagem.js';
 import { UserService } from './user.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
@@ -39,6 +44,19 @@ export class UserController {
   @Get(':id')
   findPublicProfile(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findPublicProfile(id);
+  }
+
+  @Post(':id/foto-perfil')
+  @UseInterceptors(FileInterceptor('foto', {
+    storage: memoryStorage(), limits: { fileSize: LIMITE_FOTO, files: 1 },
+  }))
+  atualizarFoto(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser('sub') usuarioId: number,
+    @UploadedFile() arquivo: Express.Multer.File,
+  ) {
+    if (id !== usuarioId) throw new ForbiddenException('Você só pode alterar sua própria foto.');
+    return this.userService.atualizarFoto(id, arquivo);
   }
 
   @Patch(':id')

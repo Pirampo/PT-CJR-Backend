@@ -2,10 +2,30 @@ import { Injectable,  ForbiddenException, NotFoundException  } from '@nestjs/com
 import { CreateProdutoDto } from './dto/create-produto.dto.js';
 import { UpdateProdutoDto } from './dto/update-produto.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { converterImagem, gravarImagem, removerArquivo } from '../imagens/arquivo-imagem.js';
 
 @Injectable()
 export class ProdutosService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async adicionarImagem(id: number, usuarioId: number, arquivo: Express.Multer.File | undefined) {
+    const produto = await this.prisma.produtos.findUnique({ where: { id }, include: { lojas: true } });
+    if (!produto) throw new NotFoundException('Produto não encontrado.');
+    if (produto.lojas.usuario_id !== usuarioId) throw new ForbiddenException('Você não tem permissão para alterar este produto.');
+    const conteudo = await converterImagem(arquivo);
+    const imagem = await gravarImagem('produtos', id, conteudo);
+    try {
+      const ultima = await this.prisma.imagens_Produtos.aggregate({
+        where: { produto_id: id }, _max: { ordem: true },
+      });
+      return await this.prisma.imagens_Produtos.create({
+        data: { produto_id: id, url_imagem: imagem.url, ordem: (ultima._max.ordem ?? -1) + 1 },
+      });
+    } catch (erro) {
+      await removerArquivo(imagem.caminho);
+      throw erro;
+    }
+  }
 
   async create(
     usuarioId: number,
@@ -37,6 +57,7 @@ export class ProdutosService {
   async findOne(id: number) {
     const produto = await this.prisma.produtos.findUnique({
       where: { id },
+      include: { imagem: { orderBy: { ordem: 'asc' } } },
     });
 
     if(!produto){

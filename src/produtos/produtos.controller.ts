@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import { LIMITE_FOTO } from '../imagens/arquivo-imagem.js';
 import { ProdutosService } from './produtos.service.js';
 import { CreateProdutoDto } from './dto/create-produto.dto.js';
 import { UpdateProdutoDto } from './dto/update-produto.dto.js';
@@ -19,6 +22,18 @@ export class ProdutosController {
     return this.produtosService.create(user.sub,createProdutoDto);
   }
 
+  @Post(':id/imagens')
+  @UseInterceptors(FileInterceptor('imagem', {
+    storage: memoryStorage(), limits: { fileSize: LIMITE_FOTO, files: 1 },
+  }))
+  adicionarImagem(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() usuario: UserPayload,
+    @UploadedFile() arquivo: Express.Multer.File,
+  ) {
+    return this.produtosService.adicionarImagem(id, usuario.sub, arquivo);
+  }
+
   @Public()
   @Get()
   findAll() {
@@ -32,8 +47,8 @@ export class ProdutosController {
   }
 
   @Patch(':id')
-  update( 
-    @Param('id',ParseIntPipe) id: number, 
+  update(
+    @Param('id',ParseIntPipe) id: number,
     @Body() updateProdutoDto: UpdateProdutoDto,
     @CurrentUser() user: UserPayload,
   ) {
@@ -48,4 +63,4 @@ export class ProdutosController {
     return this.produtosService.remove(id,user.sub);
   }
 }
-  
+

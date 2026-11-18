@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { AvaliacoesLojaService } from './avaliacoes-loja.service.js';
 import { CreateAvaliacoesLojaDto } from './dto/create-avaliacoes-loja.dto.js';
@@ -27,10 +28,20 @@ export class AvaliacoesLojaController {
     return this.avaliacoesLojaService.create(user.sub, dto);
   }
 
+  // GET /avaliacoes-loja              -> todas
+  // GET /avaliacoes-loja?loja_id=1    -> só as da loja 1
+  // GET /avaliacoes-loja?usuario_id=2 -> só as escritas pelo usuário 2
   @Public()
   @Get()
-  findAll() {
-    return this.avaliacoesLojaService.findAll();
+  findAll(
+    @Query('loja_id', new ParseIntPipe({ optional: true })) lojaId?: number,
+    @Query('usuario_id', new ParseIntPipe({ optional: true }))
+    usuarioId?: number,
+  ) {
+    return this.avaliacoesLojaService.findAll({
+      loja_id: lojaId,
+      usuario_id: usuarioId,
+    });
   }
 
   @Public()

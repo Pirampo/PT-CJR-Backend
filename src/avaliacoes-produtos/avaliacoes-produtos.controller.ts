@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { AvaliacoesProdutosService } from './avaliacoes-produtos.service.js';
 import { CreateAvaliacoesProdutoDto } from './dto/create-avaliacoes-produto.dto.js';
@@ -29,10 +30,21 @@ export class AvaliacoesProdutosController {
     return this.avaliacoesProdutosService.create(user.sub, dto);
   }
 
+  // GET /avaliacoes-produtos               -> todas
+  // GET /avaliacoes-produtos?produto_id=1  -> só as do produto 1
+  // GET /avaliacoes-produtos?usuario_id=2  -> só as escritas pelo usuário 2
   @Public()
   @Get()
-  findAll() {
-    return this.avaliacoesProdutosService.findAll();
+  findAll(
+    @Query('produto_id', new ParseIntPipe({ optional: true }))
+    produtoId?: number,
+    @Query('usuario_id', new ParseIntPipe({ optional: true }))
+    usuarioId?: number,
+  ) {
+    return this.avaliacoesProdutosService.findAll({
+      produto_id: produtoId,
+      usuario_id: usuarioId,
+    });
   }
 
   @Public()

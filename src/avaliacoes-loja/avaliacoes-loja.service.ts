@@ -1,4 +1,8 @@
 import {
+  autorPublico,
+  type AutorAvaliacao,
+} from '../avaliacoes/autor-publico.js';
+import {
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -19,6 +23,12 @@ const AUTOR = {
   select: { id: true, nome: true, username: true, foto_perfil_url: true },
 } as const;
 
+function comAutor<Avaliacao extends { usuario: AutorAvaliacao }>(
+  avaliacao: Avaliacao,
+) {
+  return { ...avaliacao, usuario: autorPublico(avaliacao.usuario) };
+}
+
 @Injectable()
 export class AvaliacoesLojaService {
   constructor(private readonly prisma: PrismaService) {}
@@ -31,7 +41,7 @@ export class AvaliacoesLojaService {
       throw new NotFoundException(`Loja com ID ${dto.loja_id} não encontrada!`);
     }
 
-    return this.prisma.avaliacoes_Loja.create({
+    const criada = await this.prisma.avaliacoes_Loja.create({
       data: {
         loja_id: dto.loja_id,
         nota: dto.nota,
@@ -40,12 +50,13 @@ export class AvaliacoesLojaService {
       },
       include: { usuario: AUTOR },
     });
+    return comAutor(criada);
   }
 
   // Sem filtro devolve todas. Com loja_id, só as daquela loja; com usuario_id, só as daquele autor.
   // As mais recentes vêm primeiro.
-  findAll(filtros: FiltroAvaliacoesLoja = {}) {
-    return this.prisma.avaliacoes_Loja.findMany({
+  async findAll(filtros: FiltroAvaliacoesLoja = {}) {
+    const avaliacoes = await this.prisma.avaliacoes_Loja.findMany({
       where: {
         loja_id: filtros.loja_id,
         usuario_id: filtros.usuario_id,
@@ -53,6 +64,7 @@ export class AvaliacoesLojaService {
       include: { usuario: AUTOR },
       orderBy: { createdAt: 'desc' },
     });
+    return avaliacoes.map(comAutor);
   }
 
   async findOne(id: number) {
@@ -63,7 +75,7 @@ export class AvaliacoesLojaService {
     if (!avaliacao) {
       throw new NotFoundException(`Avaliação com ID ${id} não encontrada!`);
     }
-    return avaliacao;
+    return comAutor(avaliacao);
   }
 
   async update(id: number, usuarioId: number, dto: UpdateAvaliacoesLojaDto) {
@@ -76,11 +88,12 @@ export class AvaliacoesLojaService {
     }
 
     // loja_id não entra: uma avaliação não muda de loja
-    return this.prisma.avaliacoes_Loja.update({
+    const atualizada = await this.prisma.avaliacoes_Loja.update({
       where: { id },
       data: { nota: dto.nota, comentario: dto.comentario },
       include: { usuario: AUTOR },
     });
+    return comAutor(atualizada);
   }
 
   async remove(id: number, usuarioId: number) {

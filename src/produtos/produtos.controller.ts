@@ -7,19 +7,22 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import {
+  LIMITE_FOTO,
+  LIMITE_IMAGEM_PRODUTO,
+} from '../imagens/arquivo-imagem.js';
 import { ProdutosService } from './produtos.service.js';
 import { CreateProdutoDto } from './dto/create-produto.dto.js';
 import { UpdateProdutoDto } from './dto/update-produto.dto.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { Public } from '../auth/decorators/isPublic.decorator.js';
 import type { UserPayload } from '../auth/types.js';
-import {
-  UseInterceptors,
-  UploadedFile,
-  BadRequestException,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { BadRequestException } from '@nestjs/common';
 
 @Controller('produtos')
 export class ProdutosController {
@@ -36,6 +39,21 @@ export class ProdutosController {
   @Get('me')
   findMine(@CurrentUser() user: UserPayload) {
     return this.produtosService.findByUser(user.sub);
+  }
+
+  @Post(':id/imagens')
+  @UseInterceptors(
+    FileInterceptor('imagem', {
+      storage: memoryStorage(),
+      limits: { fileSize: LIMITE_FOTO, files: 1 },
+    }),
+  )
+  adicionarImagem(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() usuario: UserPayload,
+    @UploadedFile() arquivo: Express.Multer.File,
+  ) {
+    return this.produtosService.adicionarImagem(id, usuario.sub, arquivo);
   }
 
   @Public()
@@ -85,30 +103,14 @@ export class ProdutosController {
   @Post(':id/imagem')
   @UseInterceptors(
     FileInterceptor('imagem', {
-      limits: {
-        fileSize: 5 * 1024 * 1024, // 5 MB
-      },
-      fileFilter: (req, file, callback) => {
-        const permitidos = ['image/jpeg', 'image/png', 'image/webp'];
-
-        if (!permitidos.includes(file.mimetype)) {
-          return callback(
-            new BadRequestException('Formato de imagem não permitido.'),
-            false,
-          );
-        }
-
-        callback(null, true);
-      },
+      storage: memoryStorage(),
+      limits: { fileSize: LIMITE_IMAGEM_PRODUTO, files: 1 },
     }),
   )
   uploadImagem(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile()
-    file: {
-      buffer: Buffer;
-      mimetype: string;
-    },
+    file: Express.Multer.File,
     @CurrentUser() user: UserPayload,
   ) {
     if (!file) {
@@ -121,42 +123,21 @@ export class ProdutosController {
   @Patch(':id/imagens/:imagemId')
   @UseInterceptors(
     FileInterceptor('imagem', {
-      limits: {
-        fileSize: 5 * 1024 * 1024,
-      },
-      fileFilter: (req, file, callback) => {
-        const permitidos = ['image/jpeg', 'image/png', 'image/webp'];
-
-        if (!permitidos.includes(file.mimetype)) {
-          return callback(
-            new BadRequestException('Formato de imagem não permitido.'),
-            false,
-          );
-        }
-
-        callback(null, true);
-      },
+      storage: memoryStorage(),
+      limits: { fileSize: LIMITE_IMAGEM_PRODUTO, files: 1 },
     }),
   )
   substituirImagem(
     @Param('id', ParseIntPipe) id: number,
     @Param('imagemId', ParseIntPipe) imagemId: number,
-    @UploadedFile() file: {
-      buffer: Buffer;
-      mimetype: string;
-    },
+    @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: UserPayload,
   ) {
     if (!file) {
       throw new BadRequestException('Envie uma imagem.');
     }
 
-    return this.produtosService.substituirImagem(
-      id,
-      imagemId,
-      user.sub,
-      file,
-    );
+    return this.produtosService.substituirImagem(id, imagemId, user.sub, file);
   }
 
   @Delete(':id/imagens/:imagemId')
@@ -165,11 +146,6 @@ export class ProdutosController {
     @Param('imagemId', ParseIntPipe) imagemId: number,
     @CurrentUser() user: UserPayload,
   ) {
-    return this.produtosService.removerImagem(
-      id,
-      imagemId,
-      user.sub,
-    );
+    return this.produtosService.removerImagem(id, imagemId, user.sub);
   }
-
 }

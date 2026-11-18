@@ -1,4 +1,8 @@
 import {
+  autorPublico,
+  type AutorAvaliacao,
+} from '../avaliacoes/autor-publico.js';
+import {
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -24,11 +28,11 @@ const AUTOR = {
 
 // Devolve o autor no campo "usuario", igual às avaliações de loja,
 // em vez do nome confuso que a relação tem no schema.
-function comAutor<Autor, Avaliacao extends { avaliacao_produto: Autor }>({
-  avaliacao_produto,
-  ...avaliacao
-}: Avaliacao) {
-  return { ...avaliacao, usuario: avaliacao_produto };
+function comAutor<
+  Autor extends AutorAvaliacao,
+  Avaliacao extends { avaliacao_produto: Autor },
+>({ avaliacao_produto, ...avaliacao }: Avaliacao) {
+  return { ...avaliacao, usuario: autorPublico(avaliacao_produto) };
 }
 
 @Injectable()

@@ -5,6 +5,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 
 describe('AvaliacoesLojaService', () => {
   let service: AvaliacoesLojaService;
+  const autor = { id: 2, nome: 'Ana', username: 'ana', foto_perfil_url: null };
+  const doBanco = { id: 1, usuario_id: 2, loja_id: 3, nota: 4, usuario: autor };
 
   // Prisma falso: os testes não tocam no banco de verdade
   const prisma = {
@@ -39,15 +41,15 @@ describe('AvaliacoesLojaService', () => {
     it('recusa avaliar uma loja que não existe', async () => {
       prisma.lojas.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.create(1, { loja_id: 99, nota: 5 }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.create(1, { loja_id: 99, nota: 5 })).rejects.toThrow(
+        NotFoundException,
+      );
       expect(prisma.avaliacoes_Loja.create).not.toHaveBeenCalled();
     });
 
     it('grava a avaliação no nome do usuário logado', async () => {
       prisma.lojas.findUnique.mockResolvedValue({ id: 1 });
-      prisma.avaliacoes_Loja.create.mockResolvedValue({ id: 10 });
+      prisma.avaliacoes_Loja.create.mockResolvedValue({ ...doBanco, id: 10 });
 
       await service.create(7, { loja_id: 1, nota: 4, comentario: 'Boa' });
 
@@ -107,6 +109,7 @@ describe('AvaliacoesLojaService', () => {
       prisma.avaliacoes_Loja.findUnique.mockResolvedValue({
         id: 1,
         usuario_id: 2,
+        usuario: autor,
       });
 
       await expect(service.update(1, 99, { nota: 1 })).rejects.toThrow(
@@ -119,8 +122,9 @@ describe('AvaliacoesLojaService', () => {
       prisma.avaliacoes_Loja.findUnique.mockResolvedValue({
         id: 1,
         usuario_id: 2,
+        usuario: autor,
       });
-      prisma.avaliacoes_Loja.update.mockResolvedValue({ id: 1 });
+      prisma.avaliacoes_Loja.update.mockResolvedValue(doBanco);
 
       await service.update(1, 2, { loja_id: 50, nota: 3 });
 
@@ -135,6 +139,7 @@ describe('AvaliacoesLojaService', () => {
       prisma.avaliacoes_Loja.findUnique.mockResolvedValue({
         id: 1,
         usuario_id: 2,
+        usuario: autor,
       });
 
       await expect(service.remove(1, 99)).rejects.toThrow(ForbiddenException);
@@ -145,6 +150,7 @@ describe('AvaliacoesLojaService', () => {
       prisma.avaliacoes_Loja.findUnique.mockResolvedValue({
         id: 1,
         usuario_id: 2,
+        usuario: autor,
       });
       prisma.avaliacoes_Loja.delete.mockResolvedValue({ id: 1 });
 
@@ -155,4 +161,35 @@ describe('AvaliacoesLojaService', () => {
       });
     });
   });
+  it.each(['listagem', 'consulta', 'criação', 'edição'])(
+    'protege username legado e dados privados na %s',
+    async (operacao) => {
+      const registro = {
+        ...doBanco,
+        usuario: {
+          ...autor,
+          username: 'legado@example.test',
+          email: 'privado@example.test',
+          senha_hash: 'hash-ficticio',
+        },
+      };
+      prisma.avaliacoes_Loja.findMany.mockResolvedValue([registro]);
+      prisma.avaliacoes_Loja.findUnique.mockResolvedValue(registro);
+      prisma.avaliacoes_Loja.create.mockResolvedValue(registro);
+      prisma.avaliacoes_Loja.update.mockResolvedValue(registro);
+      prisma.lojas.findUnique.mockResolvedValue({ id: 3 });
+      const dto = { loja_id: 3, nota: 4 };
+      const resultado =
+        operacao === 'listagem'
+          ? (await service.findAll())[0]
+          : operacao === 'consulta'
+            ? await service.findOne(1)
+            : operacao === 'criação'
+              ? await service.create(2, dto)
+              : await service.update(1, 2, { nota: 4 });
+      expect(resultado.usuario).toEqual({ ...autor, username: null });
+      expect(resultado.usuario).not.toHaveProperty('email');
+      expect(resultado.usuario).not.toHaveProperty('senha_hash');
+    },
+  );
 });

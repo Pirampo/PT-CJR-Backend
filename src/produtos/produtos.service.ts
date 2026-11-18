@@ -2,19 +2,57 @@ import {
   Injectable,
   ForbiddenException,
   NotFoundException,
-  RequestTimeoutException,
-  BadRequestException,
 } from '@nestjs/common';
 import { CreateProdutoDto } from './dto/create-produto.dto.js';
 import { UpdateProdutoDto } from './dto/update-produto.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { randomUUID } from 'node:crypto';
-import { mkdir, writeFile, unlink } from 'node:fs/promises';
-import { join } from 'node:path';
+import {
+  converterImagem,
+  gravarImagem,
+  removerArquivo,
+  removerImagemProduto,
+  LIMITE_FOTO,
+  LIMITE_IMAGEM_PRODUTO,
+} from '../imagens/arquivo-imagem.js';
 
 @Injectable()
 export class ProdutosService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async adicionarImagem(
+    id: number,
+    usuarioId: number,
+    arquivo: Express.Multer.File | undefined,
+    limite = LIMITE_FOTO,
+  ) {
+    const produto = await this.prisma.produtos.findUnique({
+      where: { id },
+      include: { lojas: true },
+    });
+    if (!produto) throw new NotFoundException('Produto não encontrado.');
+    if (produto.lojas.usuario_id !== usuarioId)
+      throw new ForbiddenException(
+        'Você não tem permissão para alterar este produto.',
+      );
+    const conteudo = await converterImagem(arquivo, false, limite);
+    const imagem = await gravarImagem('produtos', id, conteudo);
+    try {
+      const ultima = await this.prisma.imagens_Produtos.aggregate({
+        where: { produto_id: id },
+        _max: { ordem: true },
+      });
+      return await this.prisma.imagens_Produtos.create({
+        data: {
+          produto_id: id,
+          url_imagem: imagem.url,
+          ordem: (ultima._max.ordem ?? -1) + 1,
+        },
+      });
+    } catch (erro) {
+      await removerArquivo(imagem.caminho);
+      throw erro;
+    }
+  }
 
   async create(usuarioId: number, createProdutoDto: CreateProdutoDto) {
     const loja = await this.prisma.lojas.findFirst({
@@ -52,14 +90,9 @@ export class ProdutosService {
   }
 
   async findOne(id: number) {
-    
     const produto = await this.prisma.produtos.findUnique({
       where: { id },
-      include: {
-        imagem: {
-          orderBy: { ordem: 'asc' },
-        },
-      },
+      include: { imagem: { orderBy: { ordem: 'asc' } } },
     });
 
     if (!produto) {
@@ -84,9 +117,7 @@ export class ProdutosService {
     });
 
     if (!imagem) {
-      throw new NotFoundException(
-        'Imagem não encontrada para este produto.',
-      );
+      throw new NotFoundException('Imagem não encontrada para este produto.');
     }
 
     return imagem;
@@ -96,10 +127,7 @@ export class ProdutosService {
     produtoId: number,
     imagemId: number,
     usuarioId: number,
-    file: {
-      buffer: Buffer;
-      mimetype: string;
-    },
+    file: Express.Multer.File,
   ) {
     const produto = await this.prisma.produtos.findUnique({
       where: { id: produtoId },
@@ -118,57 +146,24 @@ export class ProdutosService {
 
     const imagemAtual = await this.buscarImagem(produtoId, imagemId);
 
-    const extensoes: Record<string, string> = {
-      'image/jpeg': 'jpg',
-      'image/png': 'png',
-      'image/webp': 'webp',
-    };
-
-    const extensao = extensoes[file.mimetype];
-
-    if (!extensao) {
-      throw new BadRequestException('Formato de imagem não permitido.');
-    }
-
-    const nomeArquivo = `${randomUUID()}.${extensao}`;
-    const pasta = join(process.cwd(), 'uploads', 'produtos');
-
-    await mkdir(pasta, { recursive: true });
-    await writeFile(join(pasta, nomeArquivo), file.buffer);
-
+    const conteudo = await converterImagem(file, false, LIMITE_IMAGEM_PRODUTO);
+    const nova = await gravarImagem('produtos', produtoId, conteudo);
     let imagemAtualizada;
-
     try {
       imagemAtualizada = await this.prisma.imagens_Produtos.update({
         where: { id: imagemId },
-        data: {
-          url_imagem: `/uploads/produtos/${nomeArquivo}`,
-        },
+        data: { url_imagem: nova.url },
       });
-    } catch (error) {
-      await unlink(join(pasta, nomeArquivo)).catch(() => undefined);
-      throw error;
+    } catch (erro) {
+      await removerArquivo(nova.caminho);
+      throw erro;
     }
-
-    const nomeAntigo = imagemAtual.url_imagem.split('/').pop();
-
-    if (
-      nomeAntigo &&
-      /^[0-9a-f-]{36}\.(jpg|png|webp)$/i.test(nomeAntigo)
-    ) {
-      await unlink(join(pasta, nomeAntigo)).catch((error) => {
-        console.warn('Não foi possível excluir o arquivo antigo:', error);
-      });
-    }
+    await removerImagemProduto(produtoId, imagemAtual.url_imagem);
 
     return imagemAtualizada;
   }
 
-  async removerImagem(
-    produtoId: number,
-    imagemId: number,
-    usuarioId: number,
-  ) {
+  async removerImagem(produtoId: number, imagemId: number, usuarioId: number) {
     const produto = await this.prisma.produtos.findUnique({
       where: { id: produtoId },
       include: { lojas: true },
@@ -204,18 +199,7 @@ export class ProdutosService {
       return resultado;
     });
 
-    const nomeArquivo = imagem.url_imagem.split('/').pop();
-
-    if (
-      nomeArquivo &&
-      /^[0-9a-f-]{36}\.(jpg|png|webp)$/i.test(nomeArquivo)
-    ) {
-      const pasta = join(process.cwd(), 'uploads', 'produtos');
-
-      await unlink(join(pasta, nomeArquivo)).catch((error) => {
-        console.warn('Não foi possível excluir o arquivo:', error);
-      });
-    }
+    await removerImagemProduto(produtoId, imagem.url_imagem);
 
     return removida;
   }
@@ -250,7 +234,6 @@ export class ProdutosService {
     });
   }
 
-  
   async remove(id: number, usuario_id: number) {
     const produto = await this.prisma.produtos.findUnique({
       where: { id },
@@ -261,9 +244,7 @@ export class ProdutosService {
     });
 
     if (!produto) {
-      throw new NotFoundException(
-        `Produto com ID ${id} não encontrado!`,
-      );
+      throw new NotFoundException(`Produto com ID ${id} não encontrado!`);
     }
 
     if (produto.lojas.usuario_id !== usuario_id) {
@@ -279,95 +260,14 @@ export class ProdutosService {
       where: { id },
     });
 
-    // Exclui os arquivos físicos das imagens.
-    const pasta = join(process.cwd(), 'uploads', 'produtos');
-
     for (const imagem of produto.imagem) {
-      const nomeArquivo = imagem.url_imagem.split('/').pop();
-
-      if (
-        nomeArquivo &&
-        /^[0-9a-f-]{36}\.(jpg|png|webp)$/i.test(nomeArquivo)
-      ) {
-        await unlink(join(pasta, nomeArquivo)).catch((error) => {
-          console.warn(
-            'Não foi possível excluir o arquivo:',
-            error,
-          );
-        });
-      }
+      await removerImagemProduto(id, imagem.url_imagem);
     }
 
     return removido;
   }
 
-
-  async uploadImagem(
-    id: number,
-    usuarioId: number,
-    file: {
-      buffer: Buffer;
-      mimetype: string;
-    },
-  ) {
-    const produto = await this.prisma.produtos.findUnique({
-      where: { id },
-      include: {
-        lojas: true,
-        imagem: true,
-      },
-    });
-
-    if (!produto) {
-      throw new NotFoundException('Produto não encontrado.');
-    }
-
-    if (produto.lojas.usuario_id !== usuarioId) {
-      throw new ForbiddenException(
-        'Você não tem permissão para alterar este produto.',
-      );
-    }
-
-    const extensoes: Record<string, string> = {
-      'image/jpeg': 'jpg',
-      'image/png': 'png',
-      'image/webp': 'webp',
-    };
-
-    const extensao = extensoes[file.mimetype];
-
-    if (!extensao) {
-      throw new BadRequestException('Formato de imagem não permitido.');
-    }
-
-    const nomeArquivo = `${randomUUID()}.${extensao}`;
-
-    const pasta = join(process.cwd(), 'uploads', 'produtos');
-
-    await mkdir(pasta, { recursive: true });
-
-    await writeFile(join(pasta, nomeArquivo), file.buffer);
-
-    try {
-      const ultimaImagem = await this.prisma.imagens_Produtos.findFirst({
-        where: { produto_id: id },
-        orderBy: { ordem: 'desc' },
-      });
-
-      const proximaOrdem = (ultimaImagem?.ordem ?? -1) + 1;
-
-      return await this.prisma.imagens_Produtos.create({
-        data: {
-          produto_id: id,
-          url_imagem: `/uploads/produtos/${nomeArquivo}`,
-          ordem: proximaOrdem,
-        },
-      });
-    } catch (error) {
-      const { unlink } = await import('node:fs/promises');
-      await unlink(join(pasta, nomeArquivo)).catch(() => undefined);
-      throw error;
-    }
-
+  async uploadImagem(id: number, usuarioId: number, file: Express.Multer.File) {
+    return this.adicionarImagem(id, usuarioId, file, LIMITE_IMAGEM_PRODUTO);
   }
 }

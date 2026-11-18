@@ -140,4 +140,35 @@ describe('AvaliacoesProdutosService', () => {
       });
     });
   });
+  it.each(['listagem', 'consulta', 'criação', 'edição'])(
+    'protege username legado e dados privados na %s',
+    async (operacao) => {
+      const registro = {
+        ...doBanco,
+        avaliacao_produto: {
+          ...autor,
+          username: 'legado@example.test',
+          email: 'privado@example.test',
+          senha_hash: 'hash-ficticio',
+        },
+      };
+      prisma.avaliacoes_Produtos.findMany.mockResolvedValue([registro]);
+      prisma.avaliacoes_Produtos.findUnique.mockResolvedValue(registro);
+      prisma.avaliacoes_Produtos.create.mockResolvedValue(registro);
+      prisma.avaliacoes_Produtos.update.mockResolvedValue(registro);
+      prisma.produtos.findUnique.mockResolvedValue({ id: 5 });
+      const dto = { produto_id: 5, nota: 4 };
+      const resultado =
+        operacao === 'listagem'
+          ? (await service.findAll())[0]
+          : operacao === 'consulta'
+            ? await service.findOne(1)
+            : operacao === 'criação'
+              ? await service.create(2, dto)
+              : await service.update(1, 2, { nota: 4 });
+      expect(resultado.usuario).toEqual({ ...autor, username: null });
+      expect(resultado.usuario).not.toHaveProperty('email');
+      expect(resultado.usuario).not.toHaveProperty('senha_hash');
+    },
+  );
 });

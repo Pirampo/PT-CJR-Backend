@@ -19,7 +19,7 @@ export class ComentariosController {
 
     @Post()
     create(@Body() createComentarioDto: CreateComentarioDto, @CurrentUser() usuario: UserPayload) {
-        return this.comentariosService.create(usuario.sub, createComentarioDto); 
+        return this.comentariosService.create(usuario.sub, createComentarioDto);
     }
 
     @Public()

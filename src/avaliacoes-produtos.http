@@ -62,6 +62,18 @@ Authorization: Bearer {{token}}
 
 GET {{baseUrl}}/avaliacoes-produtos
 
+### 4.1 Listar só as avaliações de um produto (cada uma vem com o autor em "usuario")
+
+GET {{baseUrl}}/avaliacoes-produtos?produto_id=1
+
+### 4.2 Listar só as avaliações escritas por um usuário
+
+GET {{baseUrl}}/avaliacoes-produtos?usuario_id=1
+
+### 4.3 ERRO esperado 400: filtro que não é número
+
+GET {{baseUrl}}/avaliacoes-produtos?produto_id=abc
+
 ### 5. Buscar avaliação por ID (sem token)
 
 GET {{baseUrl}}/avaliacoes-produtos/1

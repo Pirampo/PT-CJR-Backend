@@ -18,8 +18,15 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  // Mantém o frontend configurado e as origens locais/extras suportadas pela dev.
+  const origensExtras = [
+    process.env.FRONTEND_URL,
+    ...(process.env.CORS_ORIGINS ?? '').split(','),
+  ]
+    .map((origem) => origem?.trim())
+    .filter((origem): origem is string => Boolean(origem));
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
+    origin: [/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/, ...origensExtras],
   });
   configurarUploads(app);
   await app.listen(Number(process.env.PORT ?? 3001));

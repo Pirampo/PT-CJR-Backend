@@ -22,6 +22,12 @@ const DONO = 101;
 const OUTRO = 102;
 const PRODUTO = 201;
 const LOJA = 12;
+const autorAvaliacao = (id = DONO) => ({
+  id,
+  nome: 'Autor fictício',
+  username: `demo_${id}`,
+  foto_perfil_url: null,
+});
 const LEGADO = 'eaf42510-d8f1-40ad-a95e-a0c602c51882.jpg';
 type Imagem = {
   id: number;
@@ -127,27 +133,67 @@ const prisma = {
   avaliacoes_Loja: {
     findUnique: vi.fn(async ({ where }) =>
       where.id === 301
-        ? { id: 301, usuario_id: DONO, loja_id: LOJA, nota: 5 }
+        ? {
+            id: 301,
+            usuario_id: DONO,
+            loja_id: LOJA,
+            nota: 5,
+            usuario: autorAvaliacao(),
+          }
         : null,
     ),
     findMany: vi.fn(async () => [
-      { id: 301, usuario_id: DONO, loja_id: LOJA, nota: 5 },
+      {
+        id: 301,
+        usuario_id: DONO,
+        loja_id: LOJA,
+        nota: 5,
+        usuario: autorAvaliacao(),
+      },
     ]),
-    create: vi.fn(async ({ data }) => ({ id: 303, ...data })),
-    update: vi.fn(async ({ data }) => ({ id: 301, ...data })),
+    create: vi.fn(async ({ data }) => ({
+      id: 303,
+      ...data,
+      usuario: autorAvaliacao(data.usuario_id),
+    })),
+    update: vi.fn(async ({ data }) => ({
+      id: 301,
+      ...data,
+      usuario: autorAvaliacao(),
+    })),
     delete: vi.fn(async () => ({ id: 301 })),
   },
   avaliacoes_Produtos: {
     findUnique: vi.fn(async ({ where }) =>
       where.id === 302
-        ? { id: 302, usuario_id: DONO, produto_id: PRODUTO, nota: 4 }
+        ? {
+            id: 302,
+            usuario_id: DONO,
+            produto_id: PRODUTO,
+            nota: 4,
+            avaliacao_produto: autorAvaliacao(),
+          }
         : null,
     ),
     findMany: vi.fn(async () => [
-      { id: 302, usuario_id: DONO, produto_id: PRODUTO, nota: 4 },
+      {
+        id: 302,
+        usuario_id: DONO,
+        produto_id: PRODUTO,
+        nota: 4,
+        avaliacao_produto: autorAvaliacao(),
+      },
     ]),
-    create: vi.fn(async ({ data }) => ({ id: 304, ...data })),
-    update: vi.fn(async ({ data }) => ({ id: 302, ...data })),
+    create: vi.fn(async ({ data }) => ({
+      id: 304,
+      ...data,
+      avaliacao_produto: autorAvaliacao(data.usuario_id),
+    })),
+    update: vi.fn(async ({ data }) => ({
+      id: 302,
+      ...data,
+      avaliacao_produto: autorAvaliacao(),
+    })),
     delete: vi.fn(async () => ({ id: 302 })),
   },
   comentarios_Avaliacoes: {

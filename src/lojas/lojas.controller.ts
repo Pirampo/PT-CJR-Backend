@@ -91,6 +91,10 @@ export class LojasController {
   findAll() {
     return this.lojasService.findAll();
   }
+  @Get('me')
+  findMine(@CurrentUser() user: UserPayload) {
+    return this.lojasService.findByUser(user.sub);
+  }
 
   @Public()
   @Get(':id')

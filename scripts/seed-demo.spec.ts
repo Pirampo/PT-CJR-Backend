@@ -18,6 +18,16 @@ describe('seed:demo — proteções e conflitos sem conexão com banco', () => {
     });
   });
 
+  it('respeita BACKEND_URL quando a origem pública não é informada', () => {
+    expect(
+      configurarDemo({ ...env, BACKEND_URL: 'http://127.0.0.1:3101' })
+        .publicUrl,
+    ).toBe('http://127.0.0.1:3101');
+    expect(() =>
+      configurarDemo({ ...env, BACKEND_URL: 'https://externo.example' }),
+    ).toThrow();
+  });
+
   it.each([
     { NODE_ENV: 'production' },
     { APP_ENV: 'production' },

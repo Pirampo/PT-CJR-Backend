@@ -1,3 +1,5 @@
+@token = COLE_AQUI_O_TOKEN_OBTIDO_NO_LOGIN
+
 ### 1. Criar usuário de teste
 POST http://localhost:3000/user
 Content-Type: application/json
@@ -25,7 +27,7 @@ Content-Type: application/json
 ### 3. Criar categoria
 POST http://localhost:3000/categorias
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYnJicmlsbEBlbWFpbC5jb20iLCJpYXQiOjE3OTI3ODQ2MzEsImV4cCI6MTc5Mjg3MTAzMX0.LNlgIf44Z-mwoiLNLfp90fuSaCCCz-pMp889C7YBM0I
+Authorization: Bearer {{token}}
 
 {
   "nome": "Produtos de Limpeza"
@@ -35,14 +37,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsI
 
 ### 4. Listar categorias
 GET http://localhost:3000/categorias
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYnJicmlsbEBlbWFpbC5jb20iLCJpYXQiOjE3OTI3ODQ2MzEsImV4cCI6MTc5Mjg3MTAzMX0.LNlgIf44Z-mwoiLNLfp90fuSaCCCz-pMp889C7YBM0I
+Authorization: Bearer {{token}}
 
 ###
 
 ### 5. Atualizar categoria
 PATCH http://localhost:3000/categorias/5
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYnJicmlsbEBlbWFpbC5jb20iLCJpYXQiOjE3OTI3ODQ2MzEsImV4cCI6MTc5Mjg3MTAzMX0.LNlgIf44Z-mwoiLNLfp90fuSaCCCz-pMp889C7YBM0I
+Authorization: Bearer {{token}}
 
 {
   "nome": "Limpeza"
@@ -51,6 +53,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsI
 ###
 
 DELETE http://localhost:3000/categorias/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYnJicmlsbEBlbWFpbC5jb20iLCJpYXQiOjE3OTI3ODQ2MzEsImV4cCI6MTc5Mjg3MTAzMX0.LNlgIf44Z-mwoiLNLfp90fuSaCCCz-pMp889C7YBM0I
+Authorization: Bearer {{token}}
 
 ###

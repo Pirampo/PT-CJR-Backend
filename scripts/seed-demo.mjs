@@ -95,7 +95,9 @@ export function configurarDemo(env = process.env) {
   }
   let publico;
   try {
-    publico = new URL(env.BACKEND_PUBLIC_URL || 'http://localhost:3001');
+    publico = new URL(
+      env.BACKEND_PUBLIC_URL || env.BACKEND_URL || 'http://localhost:3001',
+    );
   } catch {
     falhar('BACKEND_PUBLIC_URL inválida.');
   }

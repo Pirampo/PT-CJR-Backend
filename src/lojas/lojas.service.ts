@@ -34,7 +34,7 @@ function temAssinaturaRaster(buffer: Buffer) {
 }
 
 function urlPublicaBackend() {
-  return (process.env.BACKEND_PUBLIC_URL ?? 'http://localhost:3001').replace(
+  return (process.env.BACKEND_PUBLIC_URL ?? process.env.BACKEND_URL ?? 'http://localhost:3001').replace(
     /\/+$/,
     '',
   );
@@ -72,6 +72,16 @@ export class LojasService {
         usuario_id: usuarioId,
       },
     });
+  }
+  async findByUser(userId: number) {
+    const lojas_associadas = await this.prisma.lojas.findMany({
+      where: { usuario_id: userId },
+    });
+    if (lojas_associadas.length === 0) {
+      return 'Nenhuma loja cadastrada por você.';
+    }
+
+    return lojas_associadas;
   }
 
   // ---------------------------------------------------------------------
@@ -448,7 +458,6 @@ export class LojasService {
   }
 
   async remove(id: number, usuarioId: number) {
-
     const loja = await this.prisma.lojas.findFirst({
       where: {
         id,
@@ -473,5 +482,4 @@ export class LojasService {
       },
     });
   }
-
 }

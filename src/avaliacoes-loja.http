@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:3001
 
 # Cole aqui o access_token que o login (passo 1) devolver
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkzOTEzMzk3LCJleHAiOjE3OTM5OTk3OTd9.cK6iJJkpWKtmp26r72CvnuqyCRzEPCL0rU1gYGWfur4
+@token = COLE_AQUI_O_TOKEN_OBTIDO_NO_LOGIN
 
 # Token de um SEGUNDO usuário, para o teste do passo 10
 @token2 = TOKEN_DO_OUTRO_USUARIO

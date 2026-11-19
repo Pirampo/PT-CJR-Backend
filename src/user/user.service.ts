@@ -71,6 +71,8 @@ export class UserService {
       select: {
         id: true,
         email: true,
+        username: true,
+        foto_perfil_url: true,
         nome: true,
         createdAt: true,
         updatedAt: true,
@@ -134,6 +136,8 @@ export class UserService {
         id: true,
         email: true,
         nome: true,
+        username: true,
+        foto_perfil_url: true,
         createdAt: true,
         updatedAt: true,
       },

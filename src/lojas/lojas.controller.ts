@@ -7,7 +7,11 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  BadRequestException,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { LojasService } from './lojas.service.js';
 import { CreateLojaDto } from './dto/create-loja.dto.js';
 import { UpdateLojaDto } from './dto/update-loja.dto.js';
@@ -44,6 +48,36 @@ export class LojasController {
     @CurrentUser() user: UserPayload,
   ) {
     return this.lojasService.update(id, user.sub, updateLojaDto);
+  }
+
+  @Post(':id/imagens/logo')
+  @UseInterceptors(
+    FileInterceptor('logo', {
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+      fileFilter: (req, file, callback) => {
+        const permitidos = ['image/jpeg', 'image/png', 'image/webp'];
+
+        if (!permitidos.includes(file.mimetype)) {
+          return callback(
+            new BadRequestException('Formato de imagem não permitido.'),
+            false,
+          );
+        }
+
+        callback(null, true);
+      },
+    }),
+  )
+  atualizarLogo(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: UserPayload,
+    @UploadedFile() file: { buffer: Buffer; mimetype: string },
+  ) {
+    if (!file) {
+      throw new BadRequestException('Envie uma imagem.');
+    }
+
+    return this.lojasService.atualizarLogo(id, user.sub, file);
   }
 
   @Delete(':id')

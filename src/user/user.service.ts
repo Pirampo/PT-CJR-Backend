@@ -7,7 +7,10 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
-
+import { randomUUID } from 'node:crypto';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { removerImagem } from '../imagens/remover-imagem.js';
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
@@ -142,6 +145,37 @@ export class UserService {
         updatedAt: true,
       },
     });
+  }
+
+  async atualizarFoto(id: number, file: { buffer: Buffer; mimetype: string }) {
+    const user = await this.prisma.usuarios.findUnique({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
+    }
+
+    const extensao = file.mimetype.split('/')[1];
+    const nomeArquivo = `${randomUUID()}.${extensao}`;
+
+    const pasta = join(process.cwd(), 'uploads', 'usuarios');
+    await mkdir(pasta, { recursive: true });
+    await writeFile(join(pasta, nomeArquivo), file.buffer);
+
+    const atualizado = await this.prisma.usuarios.update({
+      where: { id },
+      data: { foto_perfil_url: `/uploads/usuarios/${nomeArquivo}` },
+      select: { id: true, foto_perfil_url: true },
+    });
+
+    // apaga a foto antiga, se nenhum outro usuário estiver usando
+    const emUso = await this.prisma.usuarios.count({
+      where: { foto_perfil_url: user.foto_perfil_url },
+    });
+    if (emUso === 0) {
+      await removerImagem('usuarios', user.foto_perfil_url);
+    }
+
+    return atualizado;
   }
 
   async remove(id: number) {

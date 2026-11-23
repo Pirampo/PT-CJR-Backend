@@ -8,7 +8,11 @@ import {
   Delete,
   ForbiddenException,
   ParseIntPipe,
+  BadRequestException,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
@@ -42,6 +46,40 @@ export class UserController {
       );
     }
     return this.userService.update(id, updateUserDto);
+  }
+
+  @Post(':id/foto-perfil')
+  @UseInterceptors(
+    FileInterceptor('foto', {
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+      fileFilter: (req, file, callback) => {
+        const permitidos = ['image/jpeg', 'image/png', 'image/webp'];
+
+        if (!permitidos.includes(file.mimetype)) {
+          return callback(
+            new BadRequestException('Formato de imagem não permitido.'),
+            false,
+          );
+        }
+
+        callback(null, true);
+      },
+    }),
+  )
+  atualizarFoto(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser('sub') currentUserId: number,
+    @UploadedFile() file: { buffer: Buffer; mimetype: string },
+  ) {
+    if (id !== currentUserId) {
+      throw new ForbiddenException('Você só pode alterar a sua própria foto.');
+    }
+
+    if (!file) {
+      throw new BadRequestException('Envie uma imagem.');
+    }
+
+    return this.userService.atualizarFoto(id, file);
   }
 
   @Delete(':id')

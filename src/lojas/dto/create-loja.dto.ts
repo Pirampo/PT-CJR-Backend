@@ -6,8 +6,9 @@ import {
 } from 'class-validator';
 
 export class CreateLojaDto {
-  @IsInt({ message: 'O ID do usuário deve ser um número inteiro.' })
-  usuario_id: number;
+  @IsInt({ message: 'O ID da categoria deve ser um número inteiro.' })
+  @IsNotEmpty({ message: 'A categoria da loja é obrigatória.' })
+  categoria_id: number;
 
   @IsString({ message: 'O nome da loja deve ser um texto.' })
   @IsNotEmpty({ message: 'O nome da loja é obrigatório.' })

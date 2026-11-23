@@ -15,6 +15,7 @@ import { AuthGuard } from './auth/auth.guard.js';
 import { CategoriasModule } from './categorias/categorias.module.js';
 import { LojasModule } from './lojas/lojas.module.js';
 import { ProdutosModule } from './produtos/produtos.module.js';
+import { ComentariosModule } from './comentarios/comentarios.module.js';
 import { AvaliacoesLojaModule } from './avaliacoes-loja/avaliacoes-loja.module.js';
 import { AvaliacoesProdutosModule } from './avaliacoes-produtos/avaliacoes-produtos.module.js';
 
@@ -55,6 +56,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
     ProdutosModule,
 
+    ComentariosModule,
     AvaliacoesLojaModule,
 
     AvaliacoesProdutosModule,

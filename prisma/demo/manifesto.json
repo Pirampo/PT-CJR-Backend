@@ -1,0 +1,115 @@
+{
+  "versao": 1,
+  "loja": "Sabor da Vila",
+  "categoria": "Alimentos",
+  "administrador": {
+    "nome": "Administrador Sabor da Vila",
+    "username": "admin_sabor_vila",
+    "email": "admin.sabor.vila@example.com"
+  },
+  "produtos": [
+    {
+      "nome": "Pão artesanal de fermentação natural",
+      "descricao": "[Demonstração Stock.io — Sabor da Vila] Pão de casca crocante e miolo macio, fermentação natural, unidade de aproximadamente 500 g. Imagem ilustrativa; não é uma oferta real.",
+      "preco": "18.9",
+      "estoque": 20,
+      "arquivo": "pao.jpg"
+    },
+    {
+      "nome": "Queijo Minas frescal",
+      "descricao": "[Demonstração Stock.io — Sabor da Vila] Queijo fresco de sabor suave, peça de aproximadamente 500 g. Manter refrigerado. Imagem ilustrativa; não é uma oferta real.",
+      "preco": "29.9",
+      "estoque": 20,
+      "arquivo": "queijo.jpg"
+    },
+    {
+      "nome": "Cesta de frutas selecionadas",
+      "descricao": "[Demonstração Stock.io — Sabor da Vila] Cesta com frutas variadas da estação, aproximadamente 2 kg. Imagem ilustrativa; não é uma oferta real.",
+      "preco": "49.9",
+      "estoque": 20,
+      "arquivo": "frutas.jpg"
+    },
+    {
+      "nome": "Geleia artesanal de morango",
+      "descricao": "[Demonstração Stock.io — Sabor da Vila] Geleia de morango em pote de 250 g. Refrigerar após aberto. Imagem ilustrativa; não é uma oferta real.",
+      "preco": "16.9",
+      "estoque": 20,
+      "arquivo": "geleia.jpg"
+    },
+    {
+      "nome": "Mel puro de abelhas",
+      "descricao": "[Demonstração Stock.io — Sabor da Vila] Mel de abelhas em pote de 500 g. Produto fictício para demonstração. Imagem ilustrativa; não é uma oferta real.",
+      "preco": "35.9",
+      "estoque": 20,
+      "arquivo": "mel.jpg"
+    },
+    {
+      "nome": "Café especial torrado 250 g",
+      "descricao": "[Demonstração Stock.io — Sabor da Vila] Café torrado em grãos, torra média, embalagem de 250 g. Imagem ilustrativa; não é uma oferta real.",
+      "preco": "32.9",
+      "estoque": 20,
+      "arquivo": "cafe.jpg"
+    },
+    {
+      "nome": "Azeite de oliva extravirgem 500 ml",
+      "descricao": "[Demonstração Stock.io — Sabor da Vila] Azeite de oliva extravirgem, frasco de 500 ml. Conservar ao abrigo da luz. Imagem ilustrativa; não é uma oferta real.",
+      "preco": "54.9",
+      "estoque": 20,
+      "arquivo": "azeite.jpg"
+    },
+    {
+      "nome": "Granola artesanal 500 g",
+      "descricao": "[Demonstração Stock.io — Sabor da Vila] Mistura crocante de aveia, castanhas e frutas secas, pacote de 500 g. Imagem ilustrativa; não é uma oferta real.",
+      "preco": "24.9",
+      "estoque": 20,
+      "arquivo": "granola.jpg"
+    }
+  ],
+  "avaliacoes": [
+    {
+      "nota": 5,
+      "comentario": "[Demonstração] Produtos frescos e excelente apresentação. O pão artesanal merece destaque.",
+      "usuario": {
+        "nome": "Cliente Demonstração 01",
+        "username": "demo_sabor_vila_01",
+        "email": "demo.sabor.vila.01@example.test"
+      }
+    },
+    {
+      "nota": 4,
+      "comentario": "[Demonstração] Boa variedade de alimentos. Gostei especialmente dos queijos e das geleias.",
+      "usuario": {
+        "nome": "Cliente Demonstração 02",
+        "username": "demo_sabor_vila_02",
+        "email": "demo.sabor.vila.02@example.test"
+      }
+    },
+    {
+      "nota": 5,
+      "comentario": "[Demonstração] A cesta de frutas chegou muito bem selecionada. Ótima experiência.",
+      "usuario": {
+        "nome": "Cliente Demonstração 03",
+        "username": "demo_sabor_vila_03",
+        "email": "demo.sabor.vila.03@example.test"
+      }
+    },
+    {
+      "nota": 4,
+      "comentario": "[Demonstração] Produtos de qualidade, com preços compatíveis com a proposta da loja.",
+      "usuario": {
+        "nome": "Cliente Demonstração 04",
+        "username": "demo_sabor_vila_04",
+        "email": "demo.sabor.vila.04@example.test"
+      }
+    },
+    {
+      "nota": 5,
+      "comentario": "[Demonstração] O café e o mel são excelentes. Recomendo conhecer os produtos.",
+      "usuario": {
+        "nome": "Cliente Demonstração 05",
+        "username": "demo_sabor_vila_05",
+        "email": "demo.sabor.vila.05@example.test"
+      }
+    }
+  ]
+}

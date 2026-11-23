@@ -28,16 +28,20 @@ model Usuarios {
 }
 
 model Lojas {
-  id              Int               @id @default(autoincrement())
-  usuario_id      Int
-  nome            String            @unique @db.VarChar(255)
-  descricao       String?
-  logo_url        String?           @db.VarChar(255)
-  banner_url      String?           @db.VarChar(255)
-  sticker_url     String?           @db.VarChar(255)
-  createdAt       DateTime?         @default(now())
-  updatedAt       DateTime?         @updatedAt
+  id           Int       @id @default(autoincrement())
+  usuario_id   Int
+  categoria_id Int?
+  nome         String    @unique @db.VarChar(255)
+  descricao    String?
+  logo_url     String?   @db.VarChar(255)
+  banner_url   String?   @db.VarChar(255)
+  sticker_url  String?   @db.VarChar(255)
+  foto_perfil_url String? @db.VarChar(255)
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
+
   usuario         Usuarios          @relation(fields: [usuario_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  categoria       Categorias?       @relation(fields: [categoria_id], references: [id])
   produtos        Produtos[]
   avaliacoes_loja Avaliacoes_Loja[]
 }
@@ -47,6 +51,7 @@ model Categorias {
   nome             String     @db.VarChar(100)
   categoria_pai_id Int?
   produtos         Produtos[]
+  lojas            Lojas[]
 
   // subcategorias para a categoria pai
   categoria_pai Categorias?  @relation("SubCategorias", fields: [categoria_pai_id], references: [id], onUpdate: Cascade, onDelete: Cascade)

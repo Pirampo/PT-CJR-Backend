@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:3001
 
 # Cole aqui o access_token que o login (passo 1) devolver
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdGVAZW1haWwuY29tIiwiaWF0IjoxNzkzOTEzMzk3LCJleHAiOjE3OTM5OTk3OTd9.cK6iJJkpWKtmp26r72CvnuqyCRzEPCL0rU1gYGWfur4
+@token = COLE_AQUI_O_TOKEN_OBTIDO_NO_LOGIN
 
 # Token de um SEGUNDO usuário, para o teste do passo 10
 @token2 = TOKEN_DO_OUTRO_USUARIO
@@ -51,6 +51,18 @@ Authorization: Bearer {{token}}
 ### 4. Listar avaliações
 
 GET {{baseUrl}}/avaliacoes-loja
+
+### 4.1 Listar só as avaliações de uma loja (cada uma vem com o autor em "usuario")
+
+GET {{baseUrl}}/avaliacoes-loja?loja_id=1
+
+### 4.2 Listar só as avaliações escritas por um usuário
+
+GET {{baseUrl}}/avaliacoes-loja?usuario_id=1
+
+### 4.3 ERRO esperado 400: filtro que não é número
+
+GET {{baseUrl}}/avaliacoes-loja?loja_id=abc
 
 ### 5. Buscar avaliação por ID (sem token)
 

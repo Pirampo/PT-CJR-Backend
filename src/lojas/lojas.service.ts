@@ -74,14 +74,10 @@ export class LojasService {
     });
   }
   async findByUser(userId: number) {
-    const lojas_associadas = await this.prisma.lojas.findMany({
+    // sem lojas, devolve uma lista vazia: a tela decide o que mostrar
+    return this.prisma.lojas.findMany({
       where: { usuario_id: userId },
     });
-    if (lojas_associadas.length === 0) {
-      return 'Nenhuma loja cadastrada por você.';
-    }
-
-    return lojas_associadas;
   }
 
   // ---------------------------------------------------------------------

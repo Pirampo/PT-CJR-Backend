@@ -4,24 +4,30 @@ import { CreateComentarioDto } from './dto/create-comentario.dto.js';
 import { ForbiddenException } from '@nestjs/common';
 import { UpdateComentarioDto } from './dto/update-comentario.dto.js';
 import { FiltroComentariosDto } from './dto/filtro-comentarios.dto.js';
+import { autorPublico } from '../avaliacoes/autor-publico.js';
+const AUTOR = {
+    select: { id: true, nome: true, username: true, foto_perfil_url: true },
+} as const;
 
 @Injectable()
 export class ComentariosService {
-    findAll(filtros: FiltroComentariosDto) {
-        if (filtros.avaliacao_loja_id != null &&filtros.avaliacao_produto_id != null){
-            throw new BadRequestException('Informe apenas um tipo de avaliação por consulta.');
+        async findAll(filtros: FiltroComentariosDto) {
+            if (filtros.avaliacao_loja_id != null && filtros.avaliacao_produto_id != null) {
+                throw new BadRequestException('Informe apenas um tipo de avaliação por consulta.');
+            }
+            const comentarios = await this.prisma.comentarios_Avaliacoes.findMany({
+                where: {
+                    avaliacao_loja_id: filtros.avaliacao_loja_id,
+                    avaliacao_produto_id: filtros.avaliacao_produto_id,
+                },
+                include: { usuarios: AUTOR },
+                orderBy: { createdAt: 'asc' },
+            });
+            return comentarios.map(({ usuarios, ...comentario }) => ({
+                ...comentario,
+                usuario: autorPublico(usuarios),
+            }));
         }
-        return this.prisma.comentarios_Avaliacoes.findMany({
-            where: {
-                avaliacao_loja_id: filtros.avaliacao_loja_id,
-                avaliacao_produto_id: filtros.avaliacao_produto_id,
-            },
-            orderBy: {
-            createdAt: 'asc',
-        },
-        });
-    }
-
     constructor(private readonly prisma: PrismaService) {}
 
     async create(usuarioId: number, dados: CreateComentarioDto) {

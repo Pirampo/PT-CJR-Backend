@@ -26,7 +26,9 @@ const LIMITE_LOGO = 2 * 1024 * 1024;
 // real e a conversão abaixo exige que o conteúdo possa ser decodificado.
 function temAssinaturaRaster(buffer: Buffer) {
   return (
-    buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) ||
+    buffer
+      .subarray(0, 8)
+      .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) ||
     buffer.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff])) ||
     (buffer.subarray(0, 4).toString('ascii') === 'RIFF' &&
       buffer.subarray(8, 12).toString('ascii') === 'WEBP')
@@ -34,10 +36,11 @@ function temAssinaturaRaster(buffer: Buffer) {
 }
 
 function urlPublicaBackend() {
-  return (process.env.BACKEND_PUBLIC_URL ?? process.env.BACKEND_URL ?? 'http://localhost:3001').replace(
-    /\/+$/,
-    '',
-  );
+  return (
+    process.env.BACKEND_PUBLIC_URL ??
+    process.env.BACKEND_URL ??
+    'http://localhost:3001'
+  ).replace(/\/+$/, '');
 }
 
 function diretorioUploads() {
@@ -52,18 +55,25 @@ function media(notas: { nota: number }[]) {
 
 @Injectable()
 export class LojasService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-  create(createLojaDto: CreateLojaDto, usuarioId: number) {
+  async create(createLojaDto: CreateLojaDto, usuarioId: number) {
     // As imagens são enviadas pelos endpoints /lojas/:id/imagens/*,
     // que validam e convertem os arquivos. URLs livres não são aceitas.
     for (const campo of CAMPOS_URL_IMAGEM) {
       if (createLojaDto[campo]) {
         throw new BadRequestException(
           `O campo ${campo} não pode ser definido na criação. ` +
-          'Use os endpoints /lojas/:id/imagens/* para enviar imagens.',
+            'Use os endpoints /lojas/:id/imagens/* para enviar imagens.',
         );
       }
+    }
+
+    const procuraNome = await this.prisma.lojas.findUnique({
+      where: { nome: createLojaDto.nome },
+    });
+    if (procuraNome) {
+      throw new ConflictException('O nome da loja já está em uso');
     }
 
     return this.prisma.lojas.create({
@@ -223,7 +233,12 @@ export class LojasService {
       throw new BadRequestException('Não foi possível processar o banner.');
     }
 
-    return this.salvarImagemLoja(lojaId, 'banner_url', conteudo, loja.banner_url);
+    return this.salvarImagemLoja(
+      lojaId,
+      'banner_url',
+      conteudo,
+      loja.banner_url,
+    );
   }
 
   async adicionarFotoPerfil(
@@ -284,7 +299,9 @@ export class LojasService {
         if (erro instanceof SvgInvalidoError) {
           throw new BadRequestException(erro.message);
         }
-        throw new BadRequestException('Formatos de logo permitidos: SVG, PNG, JPG, JPEG e WebP.');
+        throw new BadRequestException(
+          'Formatos de logo permitidos: SVG, PNG, JPG, JPEG e WebP.',
+        );
       }
     }
 
@@ -310,7 +327,9 @@ export class LojasService {
         .webp({ quality: 90, alphaQuality: 100 })
         .toBuffer();
     } catch {
-      throw new BadRequestException('Logo inválida. Envie SVG, PNG, JPG, JPEG ou WebP de até 2 MB.');
+      throw new BadRequestException(
+        'Logo inválida. Envie SVG, PNG, JPG, JPEG ou WebP de até 2 MB.',
+      );
     }
 
     return this.salvarImagemLoja(lojaId, 'logo_url', conteudo, loja.logo_url);
@@ -364,16 +383,16 @@ export class LojasService {
     });
 
     if (!loja) {
-      throw new NotFoundException(
-        `Loja com ID ${id} não encontrada!`,
-      );
+      throw new NotFoundException(`Loja com ID ${id} não encontrada!`);
     }
 
-    const produtos = loja.produtos.map(({ produto: avaliacoes, ...produto }) => ({
-      ...produto,
-      media_avaliacoes: media(avaliacoes),
-      total_avaliacoes: avaliacoes.length,
-    }));
+    const produtos = loja.produtos.map(
+      ({ produto: avaliacoes, ...produto }) => ({
+        ...produto,
+        media_avaliacoes: media(avaliacoes),
+        total_avaliacoes: avaliacoes.length,
+      }),
+    );
 
     return {
       ...loja,
@@ -392,7 +411,10 @@ export class LojasService {
   //   (b) apontam para um arquivo já existente em uploads/lojas/<id>/.
   // Qualquer outro valor (URL externa, javascript:, etc.) gera 400.
   private async validarCamposImagemNoUpdate(
-    loja: { id: number } & Record<(typeof CAMPOS_URL_IMAGEM)[number], string | null>,
+    loja: { id: number } & Record<
+      (typeof CAMPOS_URL_IMAGEM)[number],
+      string | null
+    >,
     dto: UpdateLojaDto,
   ) {
     for (const campo of CAMPOS_URL_IMAGEM) {
@@ -402,13 +424,16 @@ export class LojasService {
 
       const caminho = this.caminhoLocalDaLoja(loja.id, valor);
       const existe = caminho
-        ? await access(caminho).then(() => true, () => false)
+        ? await access(caminho).then(
+            () => true,
+            () => false,
+          )
         : false;
 
       if (!existe) {
         throw new BadRequestException(
           `Valor inválido para ${campo}. ` +
-          'Use os endpoints /lojas/:id/imagens/* para alterar imagens.',
+            'Use os endpoints /lojas/:id/imagens/* para alterar imagens.',
         );
       }
     }

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -181,7 +182,19 @@ export class UserService {
       }
     }
 
-    const { senha, ...dados } = updateUserDto;
+    // senha_antiga serve só para a conferência, não é uma coluna do banco
+    const { senha, senha_antiga, ...dados } = updateUserDto;
+
+    if (senha) {
+      if (!senha_antiga) {
+        throw new BadRequestException(
+          'Informe a senha antiga para alterar a senha.',
+        );
+      }
+      if (!(await bcrypt.compare(senha_antiga, user.senha_hash))) {
+        throw new BadRequestException('A senha antiga está incorreta.');
+      }
+    }
 
     return this.prisma.usuarios.update({
       where: { id },

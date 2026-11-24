@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import * as bcrypt from 'bcrypt';
 import { UserService } from './user.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
-const prisma = { usuarios: { findUnique: vi.fn() } };
+const prisma = { usuarios: { findUnique: vi.fn(), update: vi.fn() } };
 
 describe('UserService', () => {
   let service: UserService;
@@ -36,5 +37,34 @@ describe('UserService', () => {
   it('preserva identificador público simples', async () => {
     prisma.usuarios.findUnique.mockResolvedValue({ id: 6, nome: 'Nome Público', username: 'dono_6.teste-01', lojas: [] });
     await expect(service.findPublicProfile(6)).resolves.toMatchObject({ username: 'dono_6.teste-01' });
+  });
+
+  describe('alteração de senha', () => {
+    beforeEach(async () => {
+      prisma.usuarios.update.mockReset().mockResolvedValue({ id: 6 });
+      prisma.usuarios.findUnique.mockResolvedValue({
+        id: 6, email: 'dono@x.com', username: 'dono', senha_hash: await bcrypt.hash('antiga1', 4),
+      });
+    });
+
+    it.each([
+      ['sem a senha antiga', undefined, 'Informe a senha antiga'],
+      ['com a senha antiga errada', 'errada1', 'A senha antiga está incorreta'],
+    ])('recusa %s', async (_, senha_antiga, mensagem) => {
+      await expect(service.update(6, { senha: 'nova123', senha_antiga })).rejects.toThrow(mensagem);
+      expect(prisma.usuarios.update).not.toHaveBeenCalled();
+    });
+
+    it('grava apenas o hash da nova senha', async () => {
+      await service.update(6, { senha: 'nova123', senha_antiga: 'antiga1' });
+      const { data } = prisma.usuarios.update.mock.calls[0][0];
+      expect(Object.keys(data)).toEqual(['senha_hash']);
+      expect(await bcrypt.compare('nova123', data.senha_hash)).toBe(true);
+    });
+
+    it('não exige senha para editar os outros campos', async () => {
+      await service.update(6, { nome: 'Novo' });
+      expect(prisma.usuarios.update.mock.calls[0][0].data).toEqual({ nome: 'Novo' });
+    });
   });
 });

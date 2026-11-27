@@ -151,6 +151,13 @@ export class UserService {
     };
   }
 
+  async atualizarSenha(id: number, novaSenha: string) {
+    await this.prisma.usuarios.update({
+      where: { id },
+      data: { senha_hash: await bcrypt.hash(novaSenha, 10) },
+    });
+  }
+
   async findByEmail(email: string) {
     const user = await this.prisma.usuarios.findUnique({ where: { email } });
 

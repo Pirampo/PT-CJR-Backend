@@ -79,14 +79,27 @@ export class ProdutosService {
     });
   }
 
-  findAll() {
-    return this.prisma.produtos.findMany({
+  async findAll() {
+    const produtos = await this.prisma.produtos.findMany({
       include: {
         imagem: {
           orderBy: { ordem: 'asc' },
         },
+        produto: { select: { nota: true } },
       },
     });
+
+    return produtos.map(({ produto: avaliacoes, ...produto }) => ({
+      ...produto,
+      media_avaliacoes: avaliacoes.length
+        ? Math.round(
+            (avaliacoes.reduce((soma, { nota }) => soma + nota, 0) /
+              avaliacoes.length) *
+              100,
+          ) / 100
+        : null,
+      total_avaliacoes: avaliacoes.length,
+    }));
   }
 
   async findOne(id: number) {

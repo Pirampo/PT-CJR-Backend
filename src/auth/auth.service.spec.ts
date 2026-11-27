@@ -8,13 +8,17 @@ import { AuthService } from './auth.service.js';
 describe('AuthService', () => {
   let service: AuthService;
   const buscarEmail = vi.fn();
+  const atualizarSenha = vi.fn();
   let jwt: JwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        { provide: UserService, useValue: { findByEmail: buscarEmail } },
+        {
+          provide: UserService,
+          useValue: { findByEmail: buscarEmail, atualizarSenha },
+        },
         JwtService,
         {
           provide: ConfigService,
@@ -27,6 +31,7 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     buscarEmail.mockReset();
+    atualizarSenha.mockReset();
     jwt = module.get(JwtService);
   });
 
@@ -59,6 +64,54 @@ describe('AuthService', () => {
     expect(payload).toMatchObject({ sub: 101, email: 'demo@example.test' });
     expect(payload.exp - payload.iat).toBe(86400);
     expect(payload).not.toHaveProperty('senha_hash');
+  });
+
+  it('troca a senha quando a senha atual confere', async () => {
+    buscarEmail.mockResolvedValue({
+      id: 7,
+      senha_hash: await bcrypt.hash('antiga1', 4),
+    } as Awaited<ReturnType<UserService['findByEmail']>>);
+
+    await expect(
+      service.trocarSenha({
+        email: 'demo@example.test',
+        senha_atual: 'antiga1',
+        nova_senha: 'novinha1',
+      }),
+    ).resolves.toEqual({ mensagem: 'Senha alterada com sucesso.' });
+    expect(atualizarSenha).toHaveBeenCalledWith(7, 'novinha1');
+  });
+
+  it('não troca a senha com a senha atual errada', async () => {
+    buscarEmail.mockResolvedValue({
+      id: 7,
+      senha_hash: await bcrypt.hash('antiga1', 4),
+    } as Awaited<ReturnType<UserService['findByEmail']>>);
+
+    await expect(
+      service.trocarSenha({
+        email: 'demo@example.test',
+        senha_atual: 'errada1',
+        nova_senha: 'novinha1',
+      }),
+    ).rejects.toMatchObject({ status: 401 });
+    expect(atualizarSenha).not.toHaveBeenCalled();
+  });
+
+  it('exige nova senha diferente da atual', async () => {
+    buscarEmail.mockResolvedValue({
+      id: 7,
+      senha_hash: await bcrypt.hash('antiga1', 4),
+    } as Awaited<ReturnType<UserService['findByEmail']>>);
+
+    await expect(
+      service.trocarSenha({
+        email: 'demo@example.test',
+        senha_atual: 'antiga1',
+        nova_senha: 'antiga1',
+      }),
+    ).rejects.toMatchObject({ status: 400 });
+    expect(atualizarSenha).not.toHaveBeenCalled();
   });
 
   it('should be defined', () => {

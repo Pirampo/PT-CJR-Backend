@@ -5,7 +5,7 @@ export class CreateAvaliacoesProdutoDto {
   produto_id: number;
 
   @IsInt({ message: 'A nota deve ser um número inteiro.' })
-  @Min(1, { message: 'A nota mínima é 1.' })
+  @Min(0, { message: 'A nota mínima é 0.' })
   @Max(5, { message: 'A nota máxima é 5.' })
   nota: number;
 

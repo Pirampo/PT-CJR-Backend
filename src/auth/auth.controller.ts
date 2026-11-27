@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { LoginRequestBody } from './dto/loginRequestBody.dto.js';
+import { TrocarSenhaDto } from './dto/trocarSenha.dto.js';
 import { Public } from './decorators/isPublic.decorator.js';
 import type { AuthenticatedRequest, UserPayload } from './types.js';
 
@@ -22,6 +23,13 @@ export class AuthController {
   // passando como parametro a validacao no dto com as informacoes passadas no corpo da requisicao
   login(@Body() LoginRequestBody: LoginRequestBody) {
     return this.authService.login(LoginRequestBody);
+  }
+
+  @Public()
+  @Post('trocar-senha')
+  @HttpCode(HttpStatus.OK)
+  trocarSenha(@Body() dto: TrocarSenhaDto) {
+    return this.authService.trocarSenha(dto);
   }
 
   @Get('me')

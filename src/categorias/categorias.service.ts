@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCategoriaDto } from './dto/create-categoria.dto.js';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -56,6 +60,18 @@ export class CategoriasService {
     if (!categoria) {
       throw new NotFoundException(
         `Categoria com ID ${id} não encontrada!`,
+      );
+    }
+
+    const [produtos, lojas, subcategorias] = await Promise.all([
+      this.prisma.produtos.count({ where: { categoria_id: id } }),
+      this.prisma.lojas.count({ where: { categoria_id: id } }),
+      this.prisma.categorias.count({ where: { categoria_pai_id: id } }),
+    ]);
+
+    if (produtos + lojas + subcategorias > 0) {
+      throw new ConflictException(
+        'Esta categoria está em uso por produtos, lojas ou subcategorias e não pode ser excluída.',
       );
     }
 

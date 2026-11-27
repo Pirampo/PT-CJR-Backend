@@ -33,6 +33,10 @@ A demonstração opcional Sabor da Vila pode ser reproduzida com `npm run seed:d
 $ npm install
 ```
 
+### Categorias
+
+Qualquer pessoa pode listar as categorias, mas criar, editar e excluir (`POST`, `PATCH` e `DELETE /categorias`) é restrito aos e-mails listados em `ADMIN_EMAILS` no `.env` (separados por vírgula). Uma categoria usada por produtos, lojas ou subcategorias não pode ser excluída (resposta `409`).
+
 ## Compile and run the project
 
 ```bash

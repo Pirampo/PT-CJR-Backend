@@ -29,6 +29,12 @@ export class UserController {
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
+  
+  @Public()
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
 
   @Get('me')
   findMe(@CurrentUser('sub') currentUserId: number) {
@@ -44,15 +50,19 @@ export class UserController {
   }
 
   @Post(':id/foto-perfil')
-  @UseInterceptors(FileInterceptor('foto', {
-    storage: memoryStorage(), limits: { fileSize: LIMITE_FOTO, files: 1 },
-  }))
+  @UseInterceptors(
+    FileInterceptor('foto', {
+      storage: memoryStorage(),
+      limits: { fileSize: LIMITE_FOTO, files: 1 },
+    }),
+  )
   atualizarFoto(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser('sub') usuarioId: number,
     @UploadedFile() arquivo: Express.Multer.File,
   ) {
-    if (id !== usuarioId) throw new ForbiddenException('Você só pode alterar sua própria foto.');
+    if (id !== usuarioId)
+      throw new ForbiddenException('Você só pode alterar sua própria foto.');
     return this.userService.atualizarFoto(id, arquivo);
   }
 

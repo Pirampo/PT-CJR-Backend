@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -7,7 +8,12 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
-import { converterImagem, gravarImagem, removerArquivo, removerFotoAnterior } from '../imagens/arquivo-imagem.js';
+import {
+  converterImagem,
+  gravarImagem,
+  removerArquivo,
+  removerFotoAnterior,
+} from '../imagens/arquivo-imagem.js';
 
 @Injectable()
 export class UserService {
@@ -15,7 +21,8 @@ export class UserService {
 
   async atualizarFoto(id: number, arquivo: Express.Multer.File | undefined) {
     const usuario = await this.prisma.usuarios.findUnique({
-      where: { id }, select: { id: true, foto_perfil_url: true },
+      where: { id },
+      select: { id: true, foto_perfil_url: true },
     });
     if (!usuario) throw new NotFoundException('Usuário não encontrado.');
     const conteudo = await converterImagem(arquivo, true);
@@ -23,7 +30,8 @@ export class UserService {
     let atualizado;
     try {
       atualizado = await this.prisma.usuarios.update({
-        where: { id }, data: { foto_perfil_url: imagem.url },
+        where: { id },
+        data: { foto_perfil_url: imagem.url },
         select: { id: true, foto_perfil_url: true },
       });
     } catch (erro) {
@@ -181,7 +189,19 @@ export class UserService {
       }
     }
 
-    const { senha, ...dados } = updateUserDto;
+    // senha_antiga serve só para a conferência, não é uma coluna do banco
+    const { senha, senha_antiga, ...dados } = updateUserDto;
+
+    if (senha) {
+      if (!senha_antiga) {
+        throw new BadRequestException(
+          'Informe a senha antiga para alterar a senha.',
+        );
+      }
+      if (!(await bcrypt.compare(senha_antiga, user.senha_hash))) {
+        throw new BadRequestException('A senha antiga está incorreta.');
+      }
+    }
 
     return this.prisma.usuarios.update({
       where: { id },

@@ -9,7 +9,8 @@ export const LIMITE_IMAGEM_PRODUTO = 5 * 1024 * 1024;
 
 export async function converterImagem(
   arquivo: Express.Multer.File | undefined,
-  apenasPng = false,
+  // fotoPerfil só muda o recorte final (quadrado 512x512); os formatos aceitos são os mesmos.
+  fotoPerfil = false,
   limite = LIMITE_FOTO,
 ) {
   if (!arquivo?.buffer?.length)
@@ -30,12 +31,8 @@ export async function converterImagem(
     buffer.subarray(8, 12).equals(Buffer.from('WEBP'));
 
   // SVGs e formatos não permitidos nunca chegam ao decodificador.
-  if (!(png || (!apenasPng && (jpeg || webp)))) {
-    throw new BadRequestException(
-      apenasPng
-        ? 'Envie uma imagem PNG válida.'
-        : 'Envie PNG, JPG, JPEG ou WebP válido.',
-    );
+  if (!(png || jpeg || webp)) {
+    throw new BadRequestException('Envie PNG, JPG, JPEG ou WebP válido.');
   }
 
   try {
@@ -45,9 +42,7 @@ export async function converterImagem(
     });
     const meta = await imagem.metadata();
     if (
-      !(apenasPng
-        ? meta.format === 'png'
-        : ['png', 'jpeg', 'webp'].includes(meta.format ?? '')) ||
+      !['png', 'jpeg', 'webp'].includes(meta.format ?? '') ||
       (meta.pages ?? 1) > 1
     ) {
       throw new Error('Formato não permitido');
@@ -55,7 +50,7 @@ export async function converterImagem(
     return await imagem
       .rotate()
       .resize(
-        apenasPng
+        fotoPerfil
           ? { width: 512, height: 512, fit: 'cover' }
           : {
               width: 900,

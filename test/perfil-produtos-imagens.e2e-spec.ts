@@ -47,14 +47,13 @@ const prisma = {
   },
 };
 
-describe('Foto PNG do usuário e imagens de produtos (Prisma em memória)', () => {
+describe('Foto do usuário e imagens de produtos (Prisma em memória)', () => {
   let app: INestApplication;
   let tokenDono: string;
   let tokenOutro: string;
   let temporario: string;
   let cwd: string;
   let png: Buffer;
-  let jpeg: Buffer;
 
   beforeAll(async () => {
     cwd = process.cwd();
@@ -71,7 +70,6 @@ describe('Foto PNG do usuário e imagens de produtos (Prisma em memória)', () =
     tokenDono = await app.get(JwtService).signAsync({ sub: DONO }, { secret });
     tokenOutro = await app.get(JwtService).signAsync({ sub: OUTRO }, { secret });
     png = await sharp({ create: { width: 40, height: 20, channels: 4, background: '#6A38F380' } }).png().toBuffer();
-    jpeg = await sharp(png).jpeg().toBuffer();
   });
 
   beforeEach(async () => {
@@ -136,16 +134,17 @@ describe('Foto PNG do usuário e imagens de produtos (Prisma em memória)', () =
     await enviarFoto(png, 'foto.jpg').expect(201);
   });
 
-  it('recusa JPEG disfarçado de PNG', async () => {
-    await enviarFoto(jpeg, 'foto.png').expect(400);
-    expect(prisma.usuarios.update).not.toHaveBeenCalled();
+  it.each(['jpeg', 'webp'] as const)('aceita foto de perfil em %s e salva como WebP', async (formato) => {
+    const arquivo = await sharp(png).toFormat(formato).toBuffer();
+    const url = (await enviarFoto(arquivo, `foto.${formato}`).expect(201)).body.foto_perfil_url;
+    expect(url).toMatch(/\.webp$/);
   });
 
   it.each([
     Buffer.from('falso'),
     Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'),
     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
-  ])('recusa conteúdo inválido no upload PNG', async (arquivo) => {
+  ])('recusa conteúdo inválido no upload da foto', async (arquivo) => {
     await enviarFoto(arquivo).expect(400);
     expect(prisma.usuarios.update).not.toHaveBeenCalled();
   });
